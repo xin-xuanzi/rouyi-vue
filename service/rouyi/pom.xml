@@ -183,6 +183,12 @@
                 <version>${ruoyi.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>com.ruoyi</groupId>
+                <artifactId>rouyi-business</artifactId>
+                <version>${ruoyi.version}</version>
+            </dependency>
+
             <!-- 代码生成-->
 <!--            <dependency>-->
 <!--                <groupId>com.ruoyi</groupId>-->
@@ -262,6 +268,7 @@
 <!--        <module>ruoyi-generator</module>-->
         <module>ruoyi-common</module>
         <module>rouyi-workflow</module>
+        <module>rouyi-business</module>
     </modules>
     <packaging>pom</packaging>
 

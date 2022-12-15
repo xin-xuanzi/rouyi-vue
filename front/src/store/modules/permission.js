@@ -113,7 +113,9 @@ function filterChildren(childrenMap, lastRouter = false) {
 // 动态路由遍历，验证是否具备权限
 export function filterDynamicRoutes(routes) {
   const res = []
+
   routes.forEach(route => {
+    console.log('route', route)
     if (route.permissions) {
       if (auth.hasPermiOr(route.permissions)) {
         res.push(route)

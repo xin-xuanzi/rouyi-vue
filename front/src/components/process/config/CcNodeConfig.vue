@@ -1,22 +1,22 @@
 <template>
   <div>
-    <el-button size="small" icon="el-icon-plus" type="primary" @click="selectOrg" round>选择抄送人</el-button>
-    <div class="option">
-      <el-checkbox label="允许发起人添加抄送人" v-model="config.shouldAdd"></el-checkbox>
-    </div>
+    <el-button size="small" icon="plus" type="primary" @click="selectOrg" round>选择抄送人</el-button>
+<!--    <div class="option">-->
+<!--      <el-checkbox label="允许发起人添加抄送人" v-model="config.shouldAdd"></el-checkbox>-->
+<!--    </div>-->
     <org-items v-model="select"/>
-<!--    <org-picker multiple ref="orgPicker" :selected="select" @ok="selected"/>-->
+    <org-picker multiple ref="orgPicker" type="user" :selected="select" @ok="selected"/>
   </div>
 </template>
 
 <script>
-// import OrgPicker from "@/components/Common/OrgPicker";
+import OrgPicker from "@/components/Common/OrgPicker";
 import OrgItems from "../OrgItems";
 
 export default {
   name: "CcNodeConfig.vue",
   components: {
-    // OrgPicker,
+    OrgPicker,
     OrgItems},
   props:{
     config:{
@@ -41,7 +41,7 @@ export default {
   },
   methods: {
     selectOrg() {
-     // this.$refs.orgPicker.show()
+     this.$refs.orgPicker.show()
     },
     selected(select) {
       console.log(select)

@@ -1,13 +1,14 @@
 <template>
-  <el-dialog class="custom-dialog"
+  <el-dialog
              :width="width" :title="title"
              append-to-body :close-on-click-modal="clickClose"
              :destroy-on-close="closeFree" v-model="_value">
     <slot></slot>
-    <div slot="footer" v-if="showFooter">
+    <template v-if="showFooter" #footer>
       <el-button size="small" @click="_value = false; $emit('cancel')">{{ cancelText }}</el-button>
       <el-button size="small" type="primary" @click="$emit('ok')">{{ okText }}</el-button>
-    </div>
+    </template>
+
   </el-dialog>
 </template>
 
@@ -75,23 +76,21 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-:deep(.custom-dialog) {
-  .el-dialog__header {
-    padding: 10px 20px;
-    .el-dialog__title{
-      font-size: 17px;
-    }
-    .el-dialog__headerbtn{
-      top: 15px;
-      .i{
-        font-size: large;
-      }
+:deep(.el-dialog__header)  {
+  padding: 10px 20px;
+  .el-dialog__title{
+    font-size: 17px;
+  }
+  .el-dialog__headerbtn{
+    top: 15px;
+    .i{
+      font-size: large;
     }
   }
+}
 
-  .el-dialog__footer {
-    padding: 10px 20px;
-  }
+.el-dialog__footer {
+  padding: 10px 20px;
 }
 
  .border {

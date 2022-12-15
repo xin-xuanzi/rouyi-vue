@@ -83,7 +83,7 @@ function handleSelectionChange(selection) {
 function getList() {
   listDbTable(queryParams).then(res => {
     dbTableList.value = res.rows;
-    total.value = res.total;
+    total.value = Number(res.total);
   });
 }
 /** 搜索按钮操作 */

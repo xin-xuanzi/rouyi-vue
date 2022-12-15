@@ -10,6 +10,6 @@ import lombok.Data;
  */
 @Data
 public class AssignedUser {
-    private Long userId;
+    private String userId;
     private String name;
 }

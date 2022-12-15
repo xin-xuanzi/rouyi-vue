@@ -79,31 +79,30 @@ export default {
     content() {
       const groups = this.config.props.groups
       let confitions = []
-      groups.forEach(group => {
-        let subConditions = []
-        group.conditions.forEach(subCondition => {
-          let subConditionStr = ''
-          // switch (subCondition.valueType) {
-          //   case ValueType.dept:
-          //   case ValueType.user:
-          //     subConditionStr = `${subCondition.title}属于[${String(subCondition.value.map(u => u.name)).replaceAll(',', '. ')}]之一`
-          //     break;
-          //   case ValueType.number:
-          //   case ValueType.string:
-          //     subConditionStr = this.getOrdinaryConditionContent(subCondition)
-          //     break;
-          // }
-          subConditions.push(subConditionStr)
-        })
+      groups.forEach((group, index) => {
+        let subConditions = group.variableTitle + group.operator + group.value;
+        // group.conditions.forEach(subCondition => {
+        //   let subConditionStr = ''
+        //   // switch (subCondition.valueType) {
+        //   //   case ValueType.dept:
+        //   //   case ValueType.user:
+        //   //     subConditionStr = `${subCondition.title}属于[${String(subCondition.value.map(u => u.name)).replaceAll(',', '. ')}]之一`
+        //   //     break;
+        //   //   case ValueType.number:
+        //   //   case ValueType.string:
+        //   //     subConditionStr = this.getOrdinaryConditionContent(subCondition)
+        //   //     break;
+        //   // }
+        //   subConditions.push(subConditionStr)
+        // })
         //根据子条件关系构建描述
-        let subConditionsStr = String(subConditions)
-            .replaceAll(',', subConditions.length > 1 ?
-                (group.groupType === 'AND' ? ') 且 (' : ') 或 (') :
-                (group.groupType === 'AND' ? ' 且 ' : ' 或 '))
-        confitions.push(subConditions.length > 1 ? `(${subConditionsStr})` : subConditionsStr)
+        let subConditionsStr = String(subConditions) + (index === (groups.length -1)?'': (group.groupType === 'AND' ? ' 且 ' : ' 或 '));
+
+        confitions.push(subConditionsStr)
       })
+
       //构建最终描述
-      return String(confitions).replaceAll(',', (this.config.props.groupsType === 'AND' ? ' 且 ' : ' 或 '))
+      return String(confitions).replaceAll(',','')
     }
   },
   methods: {
@@ -139,27 +138,35 @@ export default {
         err.push(`${this.config.name} 未设置条件`)
       }else {
         for (let i = 0; i < props.groups.length; i++) {
-          if (props.groups[i].cids.length === 0){
+          if (!props.groups[i].variableId || !props.groups[i].operator || !props.groups[i].value) {
             this.showError = true
-            this.errorInfo = `请设置条件组${this.groupNames[i]}内的条件`
-            err.push(`条件 ${this.config.name} 条件组${this.groupNames[i]}内未设置条件`)
+            this.errorInfo = `请完善条件组${this.config.name}内的条件`
+            err.push(`条件分支 ${this.config.name} 内条件未完善`)
             break
-          }else {
-            let conditions = props.groups[i].conditions
-            for (let ci = 0; ci < conditions.length; ci++) {
-              let subc = conditions[ci]
-              if (subc.value.length === 0){
-                this.showError = true
-              }else {
-                this.showError = false
-              }
-              if (this.showError){
-                this.errorInfo = `请完善条件组${this.groupNames[i]}内的${subc.title}条件`
-                err.push(`条件 ${this.config.name} 条件组${this.groupNames[i]}内${subc.title}条件未完善`)
-                return false
-              }
-            }
           }
+
+
+          // if (props.groups[i].cids.length === 0){
+          //   this.showError = true
+          //   this.errorInfo = `请设置条件组${this.groupNames[i]}内的条件`
+          //   err.push(`条件 ${this.config.name} 条件组${this.groupNames[i]}内未设置条件`)
+          //   break
+          // }else {
+          //   let conditions = props.groups[i].conditions
+          //   for (let ci = 0; ci < conditions.length; ci++) {
+          //     let subc = conditions[ci]
+          //     if (subc.value.length === 0){
+          //       this.showError = true
+          //     }else {
+          //       this.showError = false
+          //     }
+          //     if (this.showError){
+          //       this.errorInfo = `请完善条件组${this.groupNames[i]}内的${subc.title}条件`
+          //       err.push(`条件 ${this.config.name} 条件组${this.groupNames[i]}内${subc.title}条件未完善`)
+          //       return false
+          //     }
+          //   }
+          // }
         }
       }
       return !this.showError

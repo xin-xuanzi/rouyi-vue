@@ -224,10 +224,19 @@ export default {
         clearInterval(this.timer)
       }
     },
-    save() {
-      debugger
-      //this.validateDesign()
-      // 直接保存 不做验证
+    buildFromData() {
+      const nodeProps = {};
+      const variable = [];
+
+      flowProcess().nodeMap.forEach((v, k) => {
+        nodeProps[k] = v.props;
+        if (v.type === 'CONDITION' ) {
+          v.props.groups.forEach(e => {
+            variable.push(e);
+          })
+        }
+      })
+
       let template = {
         expandProcessId: this.setup.expandProcessId,
         businessCode: this.setup.businessCode,
@@ -235,8 +244,17 @@ export default {
         notifyTypes: this.setup.settings.notify.types.join(","),
         notifyTitle: this.setup.settings.notify.title,
         source: JSON.stringify(this.setup.process),
-        remark: this.setup.remark
+        remark: this.setup.remark,
+        nodeProps: JSON.stringify(nodeProps),
+        variable: JSON.stringify(variable),
       }
+
+      return template;
+    },
+    save() {
+      //this.validateDesign()
+      // 直接保存 不做验证
+      let template = this.buildFromData()
 
       saveWorkflow(template).then(rsp => {
         this.validVisible = false;
@@ -254,16 +272,9 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        console.log(this.setup)
-        let template = {
-          expandProcessId: this.setup.expandProcessId,
-          businessCode: this.setup.businessCode,
-          name: this.setup.name,
-          notifyTypes: this.setup.settings.notify.types.join(","),
-          notifyTitle: this.setup.settings.notify.title,
-          source: JSON.stringify(this.setup.process),
-          remark: this.setup.remark
-        }
+
+        let template = this.buildFromData()
+
         if (this.isNew || !this.$isNotEmpty(this.setup.formId)) {
           deploy(template).then(rsp => {
             this.validVisible = false;

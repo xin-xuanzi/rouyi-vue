@@ -41,4 +41,15 @@ public class CacheConstants
      * 登录账户密码错误次数 redis key
      */
     public static final String PWD_ERR_CNT_KEY = "pwd_err_cnt:";
+
+    public static final String PROCESS_VARIABLE = "process:variable:";
+    public static final String PROCESS_DEFINITION = "process:definition:";
+
+
+
+    public static final String BUSINESS_LEAVE_DETAIL = "business:leave:";
+
+
+    public static final String WORKFLOW_STREAM_KEY = "WORKFLOW_STREAM_MQ_KEY";
+
 }

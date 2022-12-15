@@ -15,6 +15,7 @@ import org.camunda.bpm.engine.impl.pvm.process.ActivityImpl;
 import org.camunda.bpm.engine.impl.pvm.process.TransitionImpl;
 import org.camunda.bpm.engine.runtime.ActivityInstance;
 import org.camunda.bpm.engine.runtime.ProcessInstanceModificationBuilder;
+import org.camunda.bpm.engine.task.Comment;
 import org.camunda.bpm.engine.task.Task;
 
 import java.util.ArrayList;
@@ -42,7 +43,7 @@ public class WorkflowInstance {
         this.processEngine = processEngine;
     }
 
-    public void refuse(Task currentTask, ProcessNodeProps props) {
+    public Comment refuse(Task currentTask, ProcessNodeProps props) {
         ActivityInstance tree = processEngine.getRuntimeService().getActivityInstance(instanceId);
 
         List<HistoricActivityInstance> resultList = processEngine.getHistoryService()
@@ -53,8 +54,6 @@ public class WorkflowInstance {
                 .orderByHistoricActivityInstanceEndTime()
                 .asc()
                 .list();
-
-
 
         ActivityInstance  currentActivityInstance = getInstanceIdForActivity(tree, currentTask.getTaskDefinitionKey());
 
@@ -75,7 +74,7 @@ public class WorkflowInstance {
         ProcessInstanceModificationBuilder processInstanceModification = processEngine.getRuntimeService().createProcessInstanceModification(instanceId);
 
         //
-        processEngine.getTaskService().createComment(currentTask.getId(), instanceId, comment);
+        Comment comment1 = processEngine.getTaskService().createComment(currentTask.getId(), instanceId, comment);
         switch (refuse.getType()) {
             //结束流程
             case ProcessCommonType.RefuseType.TO_END:
@@ -118,9 +117,15 @@ public class WorkflowInstance {
                 break;
         }
 
-//        processInstanceModification.execute();
+        processInstanceModification.execute();
+
+        return processEngine.getTaskService().createComment(currentTask.getId(), instanceId, comment);
     }
 
+    public Comment pass(Task currentTask, ProcessNodeProps props) {
+        processEngine.getTaskService().complete(currentTask.getId());
+        return processEngine.getTaskService().createComment(currentTask.getId(), instanceId, comment);
+    }
 
     /**
      * 获取当前活动的 instanceId

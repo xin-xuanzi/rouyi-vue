@@ -19,7 +19,26 @@ public class ProcessGroupProps extends ProcessNodeProps{
     @Data
     public static class Groups{
         private String groupType;
-        private List<String> cids;
-        private List<String> conditions;
+        private String variableId;
+        private String variableCode;
+        private String operator;
+        private String value;
+    }
+
+
+    public String resolveGroups() {
+        StringBuilder sb = new StringBuilder("${");
+        for (Groups group : groups) {
+            sb.append(group.getVariableCode()).append(group.getOperator()).append(group.getValue())
+                    .append(" ")
+                    .append("OR".equals( group.getGroupType())?"||":"&&")
+                    .append(" ")
+            ;
+        }
+
+        sb = sb.delete(sb.length() - 3, sb.length());
+
+        sb.append("}");
+        return sb.toString();
     }
 }

@@ -4,9 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.google.common.collect.Lists;
 import com.rouyi.flow.domain.ExpandProcess;
-import com.rouyi.flow.domain.dto.ActBusinessTypeDto;
 import com.rouyi.flow.domain.dto.ExpandProcessDto;
-import com.rouyi.flow.repo.dao.ActExpandBusinessDao;
 import com.rouyi.flow.repo.dao.ActExpandBusinessRelationDao;
 import com.rouyi.flow.repo.dao.ActExpandProcessDao;
 import com.rouyi.flow.repo.dao.po.ActExpandBusinessRelationPo;
@@ -15,6 +13,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -27,15 +26,24 @@ public class ActExpandProcessRepository {
 
     private ActExpandProcessDao actExpandProcessDao;
     private ActExpandBusinessRelationDao actExpandBusinessRelationDao;
-    private ActExpandBusinessDao actExpandBusinessDao;
+
+    public void changeStatus(ExpandProcess expandProcess) {
+        LambdaUpdateWrapper<ActExpandProcessPo> lambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+        lambdaUpdateWrapper.eq(ActExpandProcessPo::getId, expandProcess.getId())
+                .set(ActExpandProcessPo::getStatus, expandProcess.getStatus());
+
+        actExpandProcessDao.update(null, lambdaUpdateWrapper);
+    }
 
     public void saveExpandProcess(ExpandProcess expandProcess) {
         ActExpandProcessPo po = new ActExpandProcessPo();
+
         BeanUtils.copyProperties(expandProcess, po);
         if (expandProcess.getProcessDefinition() != null) {
             po.setActProcessId(expandProcess.getProcessDefinition().getId());
             po.setActDeploymentId(expandProcess.getProcessDefinition().getDeploymentId());
             po.setVersion(expandProcess.getProcessDefinition().getVersion());
+            po.setDeployTime(new Date());
         }
 
         if (po.getId() != null) {
@@ -43,7 +51,6 @@ public class ActExpandProcessRepository {
         } else {
             actExpandProcessDao.insert(po);
         }
-
 
         //保存 businessKey 关联
         actExpandBusinessRelationDao.delete(new LambdaUpdateWrapper<ActExpandBusinessRelationPo>()
@@ -66,13 +73,16 @@ public class ActExpandProcessRepository {
         return expandProcessDto;
     }
 
-    public List<ActBusinessTypeDto> queryBusinessType(Integer status) {
+    public ExpandProcessDto queryDetailDeployment(String actProcessId) {
+        ExpandProcessDto actExpandProcessPo = actExpandProcessDao.selectOneByActProcessId(actProcessId);
 
-        return actExpandBusinessDao.queryBusinessType(status);
+        return actExpandProcessPo;
     }
 
-    public List<ExpandProcessDto> queryExpandProcess(String businessCode) {
-        List<ActExpandProcessPo> actExpandProcessPos = actExpandProcessDao.queryByBusinessCode(businessCode);
+
+
+    public List<ExpandProcessDto> queryExpandProcess(String businessCode, String status) {
+        List<ActExpandProcessPo> actExpandProcessPos = actExpandProcessDao.queryByBusinessCode(businessCode, status);
         List<ExpandProcessDto> list = Lists.newArrayListWithCapacity(actExpandProcessPos.size());
         ExpandProcessDto expandProcess = null ;
         for (ActExpandProcessPo actExpandProcessPo : actExpandProcessPos) {

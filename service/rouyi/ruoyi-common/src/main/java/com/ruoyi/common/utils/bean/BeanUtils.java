@@ -1,8 +1,12 @@
 package com.ruoyi.common.utils.bean;
 
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.TypeReference;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,7 +36,7 @@ public class BeanUtils extends org.springframework.beans.BeanUtils
     {
         try
         {
-            copyProperties(src, dest);
+            copyProperties(dest,src);
         }
         catch (Exception e)
         {
@@ -107,4 +111,19 @@ public class BeanUtils extends org.springframework.beans.BeanUtils
     {
         return m1.substring(BEAN_METHOD_PROP_INDEX).equals(m2.substring(BEAN_METHOD_PROP_INDEX));
     }
+
+    public static Map<String, Object> fastJsonBean2Map(Object bean) {
+
+        return JSON.parseObject(JSON.toJSONString(bean),
+                new TypeReference<Map<String, Object>>() {
+                });
+    }
+
+
+    public static <T> T map2Bean(Map<String, Object> map, Class<T> clazz) {
+
+        return JSON.parseObject(JSON.toJSONString(map),clazz);
+    }
+
+
 }

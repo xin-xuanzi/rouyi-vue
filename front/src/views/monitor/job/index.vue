@@ -351,7 +351,7 @@ function getList() {
   loading.value = true;
   listJob(queryParams.value).then(response => {
     jobList.value = response.rows;
-    total.value = response.total;
+    total.value = Number(response.total);
     loading.value = false;
   });
 }

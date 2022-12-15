@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.ruoyi.common.core.domain.BasePo;
 import lombok.Data;
 
+import java.util.Date;
+
 /**
  * 流程业务PO
  *
@@ -19,5 +21,11 @@ public class ActExpandBusinessPo extends BasePo {
     private Long id;
     private String  businessCode;
     private String  businessName;
+    private String  viewPath;
+    private String  viewPath1;
+    private String  viewPath2;
     private String  status;
+
+    private Date createTime;
+    private Date updateTime;
 }

@@ -1,7 +1,9 @@
 package com.rouyi.flow.repo.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.rouyi.flow.domain.dto.ActBusinessTypeDto;
+import com.rouyi.flow.domain.dto.ActProcessBusinessDto;
+import com.rouyi.flow.domain.dto.ProcessVariableDto;
+import com.rouyi.flow.domain.query.WorkflowCommonQuery;
 import com.rouyi.flow.repo.dao.po.ActExpandBusinessPo;
 import org.springframework.stereotype.Component;
 
@@ -14,5 +16,7 @@ import java.util.List;
  */
 @Component
 public interface ActExpandBusinessDao extends BaseMapper<ActExpandBusinessPo> {
-    List<ActBusinessTypeDto> queryBusinessType(Integer status);
+    List<ActProcessBusinessDto> queryBusinessType(WorkflowCommonQuery query);
+
+    List<ProcessVariableDto> queryProcessVariable(String businessCode);
 }

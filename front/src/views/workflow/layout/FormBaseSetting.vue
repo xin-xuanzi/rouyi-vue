@@ -5,9 +5,9 @@
         <el-input v-model="setup.name" size="default"></el-input>
       </el-form-item>
       <el-form-item label="所属业务" :rules="getRule('请选择业务分组')" class="group" prop="businessCode">
-        <el-select v-model="setup.businessCode" placeholder="请选择分组" size="default">
+        <el-select v-model="setup.businessCode" placeholder="请选择分组" size="default" :disabled="true">
           <el-option v-for="op in fromGroup" :key="op.code"
-                     :label="op.name" :value="op.code">
+                     :label="op.businessName" :value="op.businessCode">
           </el-option>
 
         </el-select>

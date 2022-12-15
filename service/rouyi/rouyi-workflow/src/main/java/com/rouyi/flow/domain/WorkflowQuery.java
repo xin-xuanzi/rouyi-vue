@@ -12,4 +12,6 @@ public class WorkflowQuery {
     private String processInstanceId;
     private String businessKey;
     private Integer status;
+    private Integer pageNum;
+    private Integer pageSize;
 }

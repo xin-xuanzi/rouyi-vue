@@ -22,6 +22,7 @@ public class ProcessCommonType {
         PARSER_MAP.put(NodeType.CONDITION, new ConditionsParser());
         PARSER_MAP.put(NodeType.CONCURRENTS, new ParallelParser());
         PARSER_MAP.put(NodeType.CONCURRENT, new ParallelParser());
+        PARSER_MAP.put(NodeType.CC, new CcParser());
     }
 
     /**
@@ -65,6 +66,11 @@ public class ProcessCommonType {
          * 并行分支--支线
          */
         public static final String CONCURRENT = "CONCURRENT";
+
+        /**
+         * 抄送人
+         */
+        public static final String CC = "CC";
 
     }
 

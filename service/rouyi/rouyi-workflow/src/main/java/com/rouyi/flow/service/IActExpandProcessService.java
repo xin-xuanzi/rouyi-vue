@@ -1,9 +1,9 @@
 package com.rouyi.flow.service;
 
 import com.rouyi.flow.domain.dto.ExpandProcessDto;
-import com.rouyi.flow.domain.dto.ActBusinessTypeDto;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 流程扩展 service
@@ -12,6 +12,13 @@ import java.util.List;
  * @date 2022/11/8 14:30
  */
 public interface IActExpandProcessService {
+
+    /**
+     * 变更流程状态
+     * @param workflowDto
+     */
+    void changeStatus(ExpandProcessDto dto);
+
 
     /**
      * 部署流程
@@ -32,16 +39,15 @@ public interface IActExpandProcessService {
      */
     ExpandProcessDto detail(Long actExpandProcessId);
 
-    /**
-     * 查询业务code
-     * @return
-     */
-    List<ActBusinessTypeDto> queryActBusinessType(Integer status);
-
+    List<ExpandProcessDto> queryEnableByBusinessCode(String business, String status);
 
     /**
-     * 查询业务code 和对应的流程
+     * 更新流程定义查询扩展基本信息
+     * @param actProcessId
      * @return
      */
-    List<ActBusinessTypeDto> queryActBusinessTypeWithProcess();
+    ExpandProcessDto detailByProcessDefinition(String actProcessId);
+
+    List<Map<String,Object>> approvel(String processInstanceId);
+
 }

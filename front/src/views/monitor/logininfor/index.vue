@@ -156,7 +156,7 @@ function getList() {
   loading.value = true;
   list(proxy.addDateRange(queryParams.value, dateRange.value)).then(response => {
     logininforList.value = response.rows;
-    total.value = response.total;
+    total.value = Number(response.total);
     loading.value = false;
   });
 }

@@ -1,5 +1,8 @@
 package com.rouyi.flow.config;
 
+import org.camunda.bpm.engine.impl.cfg.IdGenerator;
+import org.camunda.bpm.engine.impl.persistence.StrongUuidGenerator;
+
 /**
  * 工作流流程常量
  *
@@ -7,10 +10,16 @@ package com.rouyi.flow.config;
  * @date 2022/11/16 18:54
  */
 public class WorkflowConstant {
+
+
+    public static final IdGenerator idGenerator = new StrongUuidGenerator();
+
+
     /**
      * 审批节点 前置审批 中间过度事件
      */
     public static final String APPROVAL_PRE_INTERMEDIATE_THROW_EVENT = "Approval-pre-process_";
+
     /**
      * 审批人节点参数
      */
@@ -20,4 +29,6 @@ public class WorkflowConstant {
      * 提交人
      */
     public static final String SUBMITTER = "Submitter_12312";
+
+    public static final String VARIABLE_INVOKE_CLASS = "com.rouyi.flow.service.IWorkflowVariableInvokeService";
 }

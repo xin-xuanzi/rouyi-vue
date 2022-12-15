@@ -50,11 +50,7 @@ export const ROOT_PROPS = {
 export const CONDITION_PROPS = {
   groupsType:"OR", //条件组逻辑关系 OR、AND
   groups:[
-    {
-      groupType:"AND", //条件组内条件关系 OR、AND
-      cids:[], //条件ID集合
-      conditions:[] //组内子条件
-    }
+
   ],
   expression: "" //自定义表达式，灵活构建逻辑关系
 }

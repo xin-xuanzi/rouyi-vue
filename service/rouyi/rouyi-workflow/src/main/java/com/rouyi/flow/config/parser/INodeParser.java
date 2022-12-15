@@ -1,8 +1,6 @@
 package com.rouyi.flow.config.parser;
 
 import com.rouyi.flow.domain.valobj.ProcessNode;
-import org.camunda.bpm.engine.impl.cfg.IdGenerator;
-import org.camunda.bpm.engine.impl.persistence.StrongUuidGenerator;
 import org.camunda.bpm.model.bpmn.builder.AbstractFlowNodeBuilder;
 
 /**
@@ -11,8 +9,6 @@ import org.camunda.bpm.model.bpmn.builder.AbstractFlowNodeBuilder;
  * @date 2022/11/8 17:43
  */
 public interface INodeParser {
-
-    public static final IdGenerator idGenerator = new StrongUuidGenerator();
 
     /**
      * 解析

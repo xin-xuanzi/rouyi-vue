@@ -17,6 +17,11 @@ public class WorkflowTest {
 
     public static void main(String[] args)throws Exception {
         test001();
+//        Class<?> aClass = Class.forName("com.rouyi.flow.service.IWorkflowVariableInvokeService");
+//        Method[] classMethods = aClass.getMethods();
+//        for (Method classMethod : classMethods) {
+//            System.out.println(classMethod.getName());
+//        }
     }
     public static void test001() throws Exception {
 

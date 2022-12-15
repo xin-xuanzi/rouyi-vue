@@ -14,6 +14,9 @@ public class ExpandProcess {
     private Long id;
     private String businessCode;
     private String source;
+    private String status;
+    private String nodeProps;
+    private String variable;
     private String name;
     private int version;
     private ProcessDefinition processDefinition;

@@ -16,11 +16,15 @@ import java.util.Date;
 public class ExpandProcessDto {
     private Long expandProcessId;
     private String businessCode;
+    private String viewPath;
+    private String actProcessId;
     private String source;
+    private String nodeProps;
+    private String variable;
     private String name;
     private String notifyTypes;
     private String notifyTitle;
-    private int status;
+    private String status;
     private int version;
     private String remark;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")

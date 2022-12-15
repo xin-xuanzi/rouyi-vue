@@ -210,7 +210,7 @@ function getList() {
   loading.value = true;
   listJobLog(proxy.addDateRange(queryParams.value, dateRange.value)).then(response => {
     jobLogList.value = response.rows;
-    total.value = response.total;
+    total.value = Number(response.total);
     loading.value = false;
   });
 }

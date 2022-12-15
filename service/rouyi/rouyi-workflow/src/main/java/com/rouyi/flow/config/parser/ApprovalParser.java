@@ -11,6 +11,7 @@ import org.camunda.bpm.engine.delegate.ExecutionListener;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.builder.AbstractFlowNodeBuilder;
 import org.camunda.bpm.model.bpmn.builder.IntermediateThrowEventBuilder;
+import org.camunda.bpm.model.bpmn.builder.MultiInstanceLoopCharacteristicsBuilder;
 import org.camunda.bpm.model.bpmn.builder.UserTaskBuilder;
 import org.camunda.bpm.model.bpmn.instance.BoundaryEvent;
 import org.camunda.bpm.model.bpmn.instance.camunda.CamundaExecutionListener;
@@ -68,6 +69,23 @@ public class ApprovalParser extends AbstractNodeParser {
 
         // 指定人员
         if (ProcessCommonType.AssignedType.ASSIGN_USER.equals(props.getAssignedType())) {
+            MultiInstanceLoopCharacteristicsBuilder countersignUsers = userTaskBuilder.multiInstance().sequential()
+                    .camundaCollection("countersignUsers")
+                    .camundaElementVariable("approver")
+                    ;
+            //会签 或签判断
+            switch (props.getMode()) {
+                case ProcessCommonType.ModeType.AND:
+
+                    break;
+                case ProcessCommonType.ModeType.NEXT:
+                    countersignUsers.parallel();
+                    break;
+                case ProcessCommonType.ModeType.OR:
+                    countersignUsers.completionCondition("${nrOfCompletedInstances == 1}");
+
+            }
+
             userTaskBuilder.camundaAssignee("${approver}");
         }
 

@@ -16,7 +16,7 @@
                :size="selectedNode.type === 'CONDITION' ? '600px':'500px'"
                direction="rtl"
                destroy-on-close>
-      <template #header>
+      <template v-slot:title>
         <div>
           <el-input v-model="selectedNode.name" size="default" v-show="showInput"
                     style="width: 300px" @blur="showInput = false"></el-input>
@@ -27,7 +27,6 @@
             {{ selectedNode.name }}
           </el-link>
         </div>
-
       </template>
       <div class="node-config-content">
         <node-config/>
@@ -75,6 +74,7 @@ export default {
       return this.$refs["process-tree"].validateProcess()
     },
     nodeSelected(node) {
+      console.log(1)
       this.showConfig = true
     }
   },

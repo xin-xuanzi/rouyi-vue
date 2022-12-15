@@ -252,7 +252,7 @@ function getList() {
   loading.value = true;
   listData(queryParams.value).then(response => {
     dataList.value = response.rows;
-    total.value = response.total;
+    total.value = Number(response.total);
     loading.value = false;
   });
 }

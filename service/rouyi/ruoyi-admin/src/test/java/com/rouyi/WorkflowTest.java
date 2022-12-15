@@ -5,11 +5,14 @@ import com.google.common.collect.Maps;
 import com.rouyi.flow.domain.WorkflowApprovalDto;
 import com.rouyi.flow.domain.WorkflowDto;
 import com.rouyi.flow.domain.WorkflowQuery;
+import com.rouyi.flow.domain.dto.ProcessTodoDto;
 import com.rouyi.flow.service.IWorkflowService;
+import com.ruoyi.common.enums.ApprovalResultEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -25,7 +28,7 @@ public class WorkflowTest extends BaseJunit{
     private String PROCESS_INSTANCE_ID = "6e450431-6635-11ed-b6c2-c6bde56990c4";
 
     @Test
-    public void startWorkflow() {
+    public void startWorkflow() throws Exception {
         WorkflowDto workflowDto = new WorkflowDto();
         workflowDto.setProcessKey("LEAVE");
 
@@ -42,6 +45,17 @@ public class WorkflowTest extends BaseJunit{
         workflowDto.setBusinessKey("LEAVE");
 
         log.info("流程启动成功》》》" + workflowService.startWorkflow(workflowDto));
+    }
+
+    @Test
+    public void todo() {
+        WorkflowQuery query = new WorkflowQuery();
+        query.setUserId("2");
+        query.setPageNum(1);
+        query.setPageSize(10);
+
+        List<ProcessTodoDto> processTodoDtos = workflowService.queryTodo(query);
+        System.out.println(processTodoDtos);
     }
 
 
@@ -79,7 +93,7 @@ public class WorkflowTest extends BaseJunit{
         WorkflowApprovalDto query = new WorkflowApprovalDto();
         query.setProcessInstance(PROCESS_INSTANCE_ID);
         query.setUserId("1");
-        query.setResult("N");
+        query.setResult(ApprovalResultEnum.REJECT.toString());
         query.setComment("不同意！！");
 
         workflowService.approve(query);

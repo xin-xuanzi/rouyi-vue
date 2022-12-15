@@ -38,6 +38,20 @@ export function deploy(data) {
     })
 }
 
+
+/**
+ * 部署流程
+ * @returns
+ */
+export function queryListByBusiness(business) {
+    return request({
+        url: '/workflow/' + business,
+        method: 'GET',
+        data: {}
+    })
+}
+
+
 /**
  * 保存流程
  * @returns
@@ -45,6 +59,18 @@ export function deploy(data) {
 export function save(data) {
     return request({
         url: '/workflow/save',
+        method: 'POST',
+        data: data
+    })
+}
+
+/**
+ * 变更流程状态流程
+ * @returns
+ */
+export function changeStatus(data) {
+    return request({
+        url: '/workflow/changeStatus',
         method: 'POST',
         data: data
     })
@@ -58,6 +84,45 @@ export function save(data) {
 export function detail(id) {
     return request({
         url: '/workflow/detail/' + id,
+        method: 'GET',
+        params: {}
+    })
+}
+
+
+/**
+ * 查询代办信息
+ * @returns
+ */
+export function queryTodo() {
+    return request({
+        url: '/workflow/todo',
+        method: 'GET',
+        params: {}
+    })
+}
+
+
+
+/**
+ * 查询代办信息
+ * @returns
+ */
+export function queryTodoDetail(taskId) {
+    return request({
+        url: '/workflow/todo/' + taskId,
+        method: 'GET',
+        params: {}
+    })
+}
+
+/**
+ * 查询审批记录
+ * @returns
+ */
+export function queryApprovalRecord(processInstanceId) {
+    return request({
+        url: '/workflow/approvalRecord/' + processInstanceId,
         method: 'GET',
         params: {}
     })

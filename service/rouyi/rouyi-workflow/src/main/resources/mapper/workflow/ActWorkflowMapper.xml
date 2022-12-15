@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rouyi.flow.repo.dao.IActWorkflowDao">
+
+    <resultMap id="approvalDotoMap" type="com.rouyi.flow.domain.dto.ApprovalRecordDto">
+         <result  column="FULL_MSG_"   property="comment"     />
+         <result  column="TIME_"   property="time"     />
+         <result  column="APPROVAL_RESULT"   property="approvalResult"     />
+         <result  column="user_name"   property="userName"     />
+         <result  column="NAME_"   property="taskName"     />
+    </resultMap>
+
+    <update id="updateComment" >
+        update ACT_HI_COMMENT set APPROVAL_RESULT=#{approvalResult} where ID_=#{commentId}
+    </update>
+    
+    <select id="queryApprovalTodo" resultMap="approvalDotoMap">
+
+        select A.ID_, A.FULL_MSG_, A.TIME_, A.REMOVAL_TIME_, ssu.user_name,  A.APPROVAL_RESULT, AHT.NAME_, ASSIGNEE_, DELETE_REASON_, DURATION_
+        from ACT_HI_COMMENT A
+        left join     ACT_HI_TASKINST AHT on A.TASK_ID_ = AHT.ID_
+        left join     sys_user ssu on AHT.ASSIGNEE_ = ssu.user_id
+        where A.PROC_INST_ID_=#{processInstanceId}
+    </select>
+</mapper> 

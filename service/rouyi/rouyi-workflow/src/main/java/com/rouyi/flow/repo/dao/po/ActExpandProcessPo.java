@@ -23,10 +23,12 @@ public class ActExpandProcessPo extends BasePo {
     private String actProcessId;
     private String actDeploymentId;
     private int version;
-    private int status;
+    private String status;
     private String name;
     private String remark;
     private String source;
+    private String nodeProps;
+    private String variable;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date deployTime;
     private String tenantId;

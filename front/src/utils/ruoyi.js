@@ -5,6 +5,19 @@
  * Copyright (c) 2019 ruoyi
  */
 
+export function dateDiff(start, end) {
+  let startTime = start.replace(/\-/g, "/");
+  let endTime = end.replace(/\-/g, "/");
+  var sTime = new Date(startTime); //开始时间
+  var eTime = new Date(endTime); //结束时间
+
+  if (sTime > eTime) {
+    return 0
+  }
+  return (eTime.getTime() - sTime.getTime()) / (1000 * 3600 * 24)
+}
+
+
 // 日期格式化
 export function parseTime(time, pattern) {
   if (arguments.length === 0 || !time) {

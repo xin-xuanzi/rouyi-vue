@@ -3,8 +3,8 @@
     <div class="picker">
       <div class="candidate" v-loading="loading">
         <div v-if="type !== 'role'">
-          <el-input v-model="search" @input="searchUser" style="width: 95%;" size="small"
-                    clearable placeholder="搜索人员，支持拼音、姓名" prefix-icon="el-icon-search"/>
+          <el-input v-model="search" @input="searchUser" style="width: 100%;" size="small"
+                    clearable placeholder="搜索关键字" prefix-icon="el-icon-search"/>
           <div v-show="!showUsers">
             <ellipsis hoverTip style="height: 18px; color: #8c8c8c; padding: 5px 0 0" :row="1" :content="deptStackStr">
               <i slot="pre" class="el-icon-office-building"></i>
@@ -29,10 +29,11 @@
 <!--                <i class="iconfont icon-map-site"></i>下级-->
 <!--              </span>-->
 <!--            </div>-->
-            <div  style="display: flex; align-items: center">
-              <el-avatar :size="35" :src="org.avatar" v-if="$isNotEmpty(org.avatar)"/>
-              <span v-else class="avatar">{{getShortName(org.nickName)}}</span>
-              <span class="name">{{ org.nickName }}</span>
+            <div v-if="type == 'variable'" style="display: flex; align-items: center">
+              <span class="name">{{ org.title }} - {{org.code ||'' }}</span>
+            </div>
+            <div v-else style="display: flex; align-items: center">
+              <span class="name">{{ org.nickName }} {{org.code ||'' }}</span>
             </div>
 <!--            <div style="display: inline-block" v-else>-->
 <!--              <i class="iconfont icon-bumen"></i>-->
@@ -40,6 +41,7 @@
 <!--            </div>-->
           </div>
         </div>
+
         <el-pagination hide-on-single-page
                        v-model:page="queryParams.pageNum"
                        v-model:limit="queryParams.pageSize"
@@ -57,10 +59,11 @@
 <!--              <i class="el-icon-folder-opened"></i>-->
 <!--              <span style="position: static" class="name">{{ org.name }}</span>-->
 <!--            </div>-->
-            <div  style="display: flex; align-items: center">
-              <el-avatar :size="35" :src="org.avatar" v-if="$isNotEmpty(org.avatar)"/>
-              <span v-else class="avatar">{{getShortName(org.nickName)}}</span>
-              <span class="name">{{ org.nickName }}</span>
+            <div v-if="type == 'variable'" style="display: flex; align-items: center">
+              <span class="name">{{ org.title }} - {{org.code ||'' }}</span>
+            </div>
+            <div v-else  style="display: flex; align-items: center">
+              <span class="name">{{ org.nickName }} {{org.code || ''}}</span>
             </div>
 <!--            <div v-else>-->
 <!--              <i class="iconfont icon-bumen"></i>-->
@@ -75,8 +78,8 @@
 </template>
 
 <script>
-// import {getOrgTree} from '@/api/org'
 import {listUser} from "@/api/system/user";
+import {queryPage} from "@/api/flowProcess/variable";
 import WDialog from "@/components/Common/WDialog";
 import Ellipsis from "@/components/Common/Ellipsis";
 
@@ -90,7 +93,7 @@ export default {
       type: String
     },
     type: {
-      default: 'org', //org选择部门/人员  user-选人  dept-选部门 role-选角色
+      default: 'org', //org选择部门/人员  user-选人  dept-选部门 role-选角色 variable
       type: String
     },
     multiple: { //是否多选
@@ -107,6 +110,7 @@ export default {
   data() {
     return {
       queryParams:{
+        condition:undefined,
         pageNum:1,
         pageSize:6,
         status:0
@@ -121,6 +125,7 @@ export default {
       nodes: [],
       select: [],
       search: '',
+      timer:null,
       deptStack: []
     }
   },
@@ -129,7 +134,7 @@ export default {
       return String(this.deptStack.map(v => v.name)).replaceAll(',', ' > ')
     },
     orgs() {
-      return !this.search || this.search.trim() === '' ? this.nodes : this.searchUsers
+      return this.nodes
     },
     showUsers(){
       return this.search || this.search.trim() !== ''
@@ -138,14 +143,23 @@ export default {
   methods: {
     show() {
       this.init()
-      this.getOrgList()
+      this.getData()
+    },
+    getData(){
+      switch (this.type) {
+        case 'variable':
+          this.getVariableList()
+          break;
+        default:
+          this.getOrgList();
+      }
     },
     orgItemClass(org){
       return {
         'org-item': true,
         'org-dept-item': this.type === 'dept',
-        'org-user-item': this.type === 'user',
-        'org-role-item': this.type === 'role'
+        'org-user-item': this.type === 'user' || this.type === 'variable',
+        'org-role-item': this.type === 'role',
       }
     },
     disableDept(node) {
@@ -155,8 +169,18 @@ export default {
       this.loading = true
       const res = await listUser(this.queryParams)
       this.loading = false
-      this.nodes = res.rows;
-      this.total = res.total;
+      //提取部分数据
+      let arr = []
+      res.rows.forEach(e => {
+        arr.push(
+            {
+              userId:e.userId,
+              nickName:e.nickName,
+            }
+        )
+      })
+      this.nodes = arr;
+      this.total = Number(res.total);
       this.selectToLeft()
       this.visible = true
       // getOrgTree({deptId: this.nowDeptId, type: this.type}).then(rsp => {
@@ -168,6 +192,15 @@ export default {
       //   this.$message.error(err.response.data)
       // })
     },
+    async getVariableList() {
+      this.loading = true
+      const res = await queryPage(this.queryParams)
+      this.loading = false
+      this.nodes = res.rows;
+      this.total = Number(res.total);
+      //this.selectToLeft()
+      this.visible = true
+    },
     getShortName(name) {
       if (name) {
         return name.length > 1 ? name.substring(0, 1) : name;
@@ -175,23 +208,23 @@ export default {
       return '**'
     },
     searchUser() {
-      let userName = this.search.trim()
-      this.searchUsers = []
       this.loading = true
-      // getUserByName({userName: userName}).then(rsp => {
-      //   this.loading = false
-      //   this.searchUsers = rsp.data
-      //   this.selectToLeft()
-      // }).catch(err => {
-      //   this.loading = false
-      //   this.$message.error("接口异常")
-      // })
+      clearTimeout(this.timer)
+      this.timer = setTimeout(() => {
+        this.queryParams.condition = this.search.trim()
+        this.searchUsers = []
+        this.getData();
+      }, 500)
     },
     selectToLeft() {
-      let nodes = this.search.trim() === '' ? this.nodes : this.searchUsers;
-      nodes.forEach(node => {
+
+      let attributes = 'userId'
+      if (this.type === 'variable') {
+        attributes = 'id'
+      }
+      this.nodes.forEach(node => {
         for (let i = 0; i < this.select.length; i++) {
-          if (this.select[i].userId === node.userId) {
+          if (this.select[i][attributes] == node[attributes]) {
             node.selected = true;
             break;
           } else {

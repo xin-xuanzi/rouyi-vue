@@ -70,7 +70,12 @@
             <pattern>${log.pattern}</pattern>
         </encoder>
     </appender>
-	
+
+    <!-- camunda -->
+    <logger name="org.camunda" level="info" />
+    <logger name="org.camunda.bpm.engine" level="debug" />
+
+    <logger name="org.apache.ibatis" level="info" />
 	<!-- 系统模块日志级别控制  -->
 	<logger name="com.ruoyi" level="info" />
 	<!-- Spring日志级别控制  -->

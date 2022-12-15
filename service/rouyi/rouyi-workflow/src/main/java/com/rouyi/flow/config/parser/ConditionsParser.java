@@ -35,7 +35,6 @@ public class ConditionsParser extends AbstractNodeParser {
             //解析分支
             List<ProcessNode> branchs = processNode.getBranchs();
             for (int i = 0; i < branchs.size(); i++) {
-//                 nodeBuilder1 = processParser.nodeParse(nodeBuilder, branchs.get(i));
                 nodeBuilder = processParser.nodeParse(nodeBuilder, branchs.get(i));
 
                 if (i == 0) {
@@ -45,7 +44,6 @@ public class ConditionsParser extends AbstractNodeParser {
                 }
 
                 //条件分支创建之后，跳转到开始网关
-//                nodeBuilder.moveToLastGateway();
                 nodeBuilder = nodeBuilder.moveToNode(processNode.getId());
             }
 
@@ -54,7 +52,7 @@ public class ConditionsParser extends AbstractNodeParser {
             //解析后置处理
             nodeBuilder = parsePostProcess(nodeBuilder, processNode, processParser);
         } else {
-            nodeBuilder = nodeBuilder.condition(processNode.getName(), props.getExpression());
+            nodeBuilder = nodeBuilder.condition(processNode.getName(), props.resolveGroups());
 
             if (processNode.hasChildren()){
                 nodeBuilder = processParser.nodeParse(nodeBuilder, processNode.getChildren());

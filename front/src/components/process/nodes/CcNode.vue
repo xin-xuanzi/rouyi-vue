@@ -30,7 +30,7 @@ export default {
         return '由发起人指定'
       }else if (this.config.props.assignedUser.length > 0) {
         let texts = []
-        this.config.props.assignedUser.forEach(org => texts.push(org.name))
+        this.config.props.assignedUser.forEach(org => texts.push(org.nickName))
         return String(texts).replaceAll(',', '、')
       } else {
         return null

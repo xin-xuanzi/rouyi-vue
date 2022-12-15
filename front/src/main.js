@@ -1,7 +1,7 @@
 import { createApp } from 'vue'
 
 import Cookies from 'js-cookie'
-
+import 'default-passive-events'
 import ElementPlus from 'element-plus'
 import locale from 'element-plus/lib/locale/lang/zh-cn' // 中文语言
 

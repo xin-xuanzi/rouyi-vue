@@ -2,10 +2,14 @@ package com.rouyi.flow.config.listener;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.rouyi.flow.config.WorkflowConstant;
+import com.rouyi.flow.domain.valobj.AssignedUser;
 import com.rouyi.flow.domain.valobj.ProcessGroupProps;
 import lombok.extern.slf4j.Slf4j;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 用户节点 监听器 listener
@@ -39,9 +43,12 @@ public class ApprovalNodeListener {
             //获取节点配置参数
             ProcessGroupProps props = jsonObject.getObject(nextApprovalNodeId, ProcessGroupProps.class);
 
-            execution.setVariable("approver", "1");
+            List<AssignedUser> assignedUser = props.getAssignedUser();
+            List<String> collect = assignedUser.stream().map(AssignedUser::getUserId).collect(Collectors.toList());
+            execution.setVariable("countersignUsers", collect);
         }
-        log.error("用户节点监听还是");
+
+        log.error("用户节点 preProcessEndListener 监听");
     }
 
 }

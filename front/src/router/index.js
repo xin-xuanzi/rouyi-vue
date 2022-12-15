@@ -84,27 +84,6 @@ export const constantRoutes = [
       }
     ]
   },
-  {
-    path: '/workflow',
-    component: Layout,
-    hidden: true,
-    children: [
-      {
-        path: 'deploy',
-        component: () => import('@/views/workflow/deploy'),
-        name: 'deploy',
-        meta: { title: '流程部署', icon: 'user' },
-        children:[
-          {
-            path: 'design',
-            component: () => import('@/views/workflow/design'),
-            name: 'design',
-            meta: { title: '修改生成配置' }
-          }
-        ]
-      }
-    ]
-  },
 ]
 
 // 动态路由，基于用户权限动态去加载
@@ -176,6 +155,21 @@ export const dynamicRoutes = [
         component: () => import('@/views/tool/gen/editTable'),
         name: 'GenEdit',
         meta: { title: '修改生成配置', activeMenu: '/tool/gen' }
+      }
+    ]
+  },
+
+  {
+    path: '/business/todo',
+    component: Layout,
+    hidden: true,
+    permissions: ['tool:gen:edit'],
+    children: [
+      {
+        path: 'index/:taskId',
+        component: () => import('@/views/business/todo/index'),
+        name: 'ApprovalTodo',
+        meta: { title: '审批', activeMenu: '/index' }
       }
     ]
   },
