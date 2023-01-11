@@ -74,7 +74,6 @@ export default {
       return this.$refs["process-tree"].validateProcess()
     },
     nodeSelected(node) {
-      console.log(1)
       this.showConfig = true
     }
   },

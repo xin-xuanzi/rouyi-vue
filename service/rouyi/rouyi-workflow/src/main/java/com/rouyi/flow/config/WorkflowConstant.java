@@ -30,5 +30,5 @@ public class WorkflowConstant {
      */
     public static final String SUBMITTER = "Submitter_12312";
 
-    public static final String VARIABLE_INVOKE_CLASS = "com.rouyi.flow.service.IWorkflowVariableInvokeService";
+
 }

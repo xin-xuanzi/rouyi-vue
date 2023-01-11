@@ -14,6 +14,6 @@ public class LeaveTest extends BaseJunit{
 
     @Test
     public void text001() {
-        System.out.println(leaveService);
+
     }
 }

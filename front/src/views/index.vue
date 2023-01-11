@@ -1,43 +1,15 @@
 <template>
   <div class="app-container home">
-
     <el-row :gutter="20">
       <el-col :xs="24" :sm="24" :md="24" :lg="24">
-        <el-card class="update-log" v-loading="loading">
-          <template v-slot:header>
-            <div class="clearfix">
-              <div>
-                <span>代办</span>
-              </div>
-
-              <div>
-                <right-toolbar :search="false" @queryTable="getTodoList"></right-toolbar>
-              </div>
-            </div>
-
-          </template>
-          <div class="body">
-            <el-table :data="tableData" style="width: 100%" @row-click="rowClick">
-              <el-table-column label="业务编码" prop="businessCode" />
-              <el-table-column label="业务名称" prop="businessName"/>
-              <el-table-column label="业务ID" prop="caseInstanceId"/>
-              <el-table-column label="流程名称" prop="processName" />
-              <el-table-column label="提交人" prop="submitUserName" />
-              <el-table-column label="部门" prop="deptName" />
-              <el-table-column label="通知时间" prop="createTime" />
-            </el-table>
-          </div>
-
-          <pagination
-              v-show="total > 0"
-              :total="total"
-              v-model:current-page="queryParams.pageNum"
-              v-model:page-size="queryParams.pageSize"
-              @pagination="getTodoList"
-          />
-
-        </el-card>
-
+        <el-tabs v-model="activeName" class="demo-tabs">
+          <el-tab-pane label="待审批" name="first">
+            <todo-list active-type="Todo"></todo-list>
+          </el-tab-pane>
+          <el-tab-pane label="已审批" name="second">
+            <todo-list active-type="Approved"></todo-list>
+          </el-tab-pane>
+        </el-tabs>
 
       </el-col>
     </el-row>
@@ -45,35 +17,15 @@
 </template>
 
 <script setup name="Index">
-import {queryTodo} from "@/api/flowProcess/flowProcess";
-import {getCurrentInstance, reactive} from "vue";
-const router = useRouter();
+import TodoList from "@/views/business/todo/list.vue";
+import {getCurrentInstance} from "vue";
+
 
 const {proxy} = getCurrentInstance();
-const tableData = ref([])
-const loading = ref(false);
-const showSearch = ref(true);
-const total = ref(0);
+
 const version = ref('3.8.4')
-const queryParams = reactive({
-  pageNum:1,
-  pageSize:10,
-})
-function getTodoList(){
-  loading.value = true;
-  queryTodo().then(res => {
-    tableData.value = res.rows;
-    total.value = Number(res.total);
-    loading.value = false;
-  })
-}
+const activeName = ref('first')
 
-
-function rowClick(row, column, event) {
-  router.push("/business/todo/index/" + row.taskId);
-}
-
-getTodoList();
 </script>
 
 <style scoped lang="scss">
@@ -82,16 +34,7 @@ getTodoList();
     right: 10px;
   }
 
-  .clearfix{
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    div:first-child{
-      flex: 23;
-      font-size: 17px;
-      font-weight: 500;
-    }
-  }
+
   blockquote {
     padding: 10px 20px;
     margin: 0 0 20px;

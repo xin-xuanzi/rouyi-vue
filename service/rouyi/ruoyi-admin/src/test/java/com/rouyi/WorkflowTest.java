@@ -7,7 +7,7 @@ import com.rouyi.flow.domain.WorkflowDto;
 import com.rouyi.flow.domain.WorkflowQuery;
 import com.rouyi.flow.domain.dto.ProcessTodoDto;
 import com.rouyi.flow.service.IWorkflowService;
-import com.ruoyi.common.enums.ApprovalResultEnum;
+import com.ruoyi.common.enums.ApprovalActionEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +55,20 @@ public class WorkflowTest extends BaseJunit{
         query.setPageSize(10);
 
         List<ProcessTodoDto> processTodoDtos = workflowService.queryTodo(query);
-        System.out.println(processTodoDtos);
+
+    }
+
+    @Test
+    public void approved() {
+        WorkflowQuery query = new WorkflowQuery();
+        query.setUserId("1");
+        query.setPageNum(1);
+        query.setPageSize(10);
+
+        List<ProcessTodoDto> processTodoDtos = workflowService.queryApproved(query);
+        for (ProcessTodoDto processTodoDto : processTodoDtos) {
+            System.out.println(processTodoDto);
+        }
     }
 
 
@@ -93,7 +106,7 @@ public class WorkflowTest extends BaseJunit{
         WorkflowApprovalDto query = new WorkflowApprovalDto();
         query.setProcessInstance(PROCESS_INSTANCE_ID);
         query.setUserId("1");
-        query.setResult(ApprovalResultEnum.REJECT.toString());
+        query.setResult(ApprovalActionEnum.REJECT.toString());
         query.setComment("不同意！！");
 
         workflowService.approve(query);

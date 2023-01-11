@@ -17,7 +17,6 @@ import org.camunda.bpm.engine.repository.ProcessDefinition;
 import org.camunda.bpm.engine.task.Comment;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,16 +28,17 @@ import java.util.*;
  */
 @Service
 @AllArgsConstructor
-public class ActExpandProcessServiceImpl implements IActExpandProcessService {
+public class ActExpandProcessServiceImpl  implements IActExpandProcessService {
 
     private RepositoryService repositoryService;
 
     private TaskService taskService;
 
-    @Autowired
     private HistoryService historyService;
 
+
     private ActExpandProcessRepository actExpandProcessRepository;
+
 
 
     @Override
@@ -75,12 +75,20 @@ public class ActExpandProcessServiceImpl implements IActExpandProcessService {
         //保存流程配置
         expandProcess.setProcessDefinition(processDefinition);
 
+        //保存历史流程信息
+        actExpandProcessRepository.saveHiExpandProcess(expandProcess);
         actExpandProcessRepository.saveExpandProcess(expandProcess);
     }
 
     @Override
     public List<ExpandProcessDto> queryEnableByBusinessCode(String business, String status) {
         return actExpandProcessRepository.queryExpandProcess(business, status);
+    }
+
+    @Override
+    public List<ExpandProcessDto> queryHiExpandProcess(Long expandProcessId) {
+        List<ExpandProcessDto> expandProcessDtos = actExpandProcessRepository.queryHiExpandProcess(expandProcessId);
+        return expandProcessDtos;
     }
 
     @Override

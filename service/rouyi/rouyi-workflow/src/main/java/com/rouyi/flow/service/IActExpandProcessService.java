@@ -42,6 +42,13 @@ public interface IActExpandProcessService {
     List<ExpandProcessDto> queryEnableByBusinessCode(String business, String status);
 
     /**
+     * 查询流程历史信息
+     * @param expandProcessId
+     * @return
+     */
+    List<ExpandProcessDto> queryHiExpandProcess(Long expandProcessId);
+
+    /**
      * 更新流程定义查询扩展基本信息
      * @param actProcessId
      * @return

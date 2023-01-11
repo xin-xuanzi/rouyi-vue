@@ -163,7 +163,7 @@ export const dynamicRoutes = [
     path: '/business/todo',
     component: Layout,
     hidden: true,
-    permissions: ['tool:gen:edit'],
+    roles: ['common'],
     children: [
       {
         path: 'index/:taskId',

@@ -28,9 +28,17 @@ public class LeaveRepository {
     public void submitLeave(LeaveDto dto) {
         LeavePo po = new LeavePo();
         BeanUtils.copyBeanProp(dto, po);
+        po.setLeaveType(dto.getLeaveType());
         po.setStatus(BusinessProcessStatus.APPROVAL.getCode());
         leaveDao.insert(po);
         dto.setId(po.getId());
+    }
+
+    public void updateStatus(long id, String status ) {
+        LeavePo po = new LeavePo();
+        po.setId(id);
+        po.setStatus(status);
+        leaveDao.updateById(po);
     }
 
     public void saveProcessInstanceId(Long leaveId, String processInstanceId) {

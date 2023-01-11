@@ -14,24 +14,32 @@ import com.rouyi.flow.domain.dto.ProcessVariableDto;
 import com.rouyi.flow.domain.entity.WorkflowInstance;
 import com.rouyi.flow.domain.valobj.ProcessGroupProps;
 import com.rouyi.flow.repo.repository.ActWorkflowRepository;
+import com.rouyi.flow.service.ApproveObserver;
 import com.rouyi.flow.service.IActExpandProcessService;
 import com.rouyi.flow.service.IWorkflowService;
 import com.ruoyi.common.core.domain.entity.SysUser;
+import com.ruoyi.common.core.domain.model.WorkflowApprovalResultMsg;
+import com.ruoyi.common.core.redis.RedisService;
 import com.ruoyi.common.core.service.ISysCommonService;
-import com.ruoyi.common.enums.ApprovalResultEnum;
+import com.ruoyi.common.enums.ApprovalActionEnum;
+import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.spring.SpringUtils;
 import com.ruoyi.common.workflow.IWorkflowServiceApi;
 import com.ruoyi.common.workflow.WorkflowStartParam;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.camunda.bpm.engine.*;
+import org.camunda.bpm.engine.history.HistoricTaskInstance;
+import org.camunda.bpm.engine.history.HistoricVariableInstance;
 import org.camunda.bpm.engine.repository.ProcessDefinition;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
 import org.camunda.bpm.engine.runtime.VariableInstance;
 import org.camunda.bpm.engine.task.Comment;
 import org.camunda.bpm.engine.task.Task;
+import org.camunda.bpm.engine.task.TaskQuery;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -44,9 +52,11 @@ import java.util.Map;
 @Slf4j
 @Service
 @AllArgsConstructor
-public class WorkflowServiceImpl implements IWorkflowService, IWorkflowServiceApi {
+public class WorkflowServiceImpl extends AbstractSubject implements IWorkflowService, IWorkflowServiceApi {
 
     private RuntimeService runtimeService;
+
+    private HistoryService historyService;
 
     private IdentityService identityService;
 
@@ -62,6 +72,14 @@ public class WorkflowServiceImpl implements IWorkflowService, IWorkflowServiceAp
 
     private ActWorkflowRepository actWorkflowRepository;
 
+    private RedisService redisService;
+
+    private ApproveObserver approveObserver;
+
+    @PostConstruct
+    public void registerObserver(){
+        add(approveObserver);
+    }
 
     @Override
     public String startWorkflow(WorkflowDto workflowDto) throws Exception {
@@ -117,11 +135,17 @@ public class WorkflowServiceImpl implements IWorkflowService, IWorkflowServiceAp
     @Override
     public List<ProcessTodoDto> queryTodo(WorkflowQuery query) {
         int firstResult = (query.getPageNum() - 1) * query.getPageSize();
+        TaskQuery taskQuery = taskService.createTaskQuery()
+                .taskAssignee(query.getUserId());
 
-        List<Task> tasks = taskService.createTaskQuery()
-                .taskAssignee(query.getUserId()).orderByTaskCreateTime().desc()
-                .listPage(firstResult, query.getPageSize());
+        if (StringUtils.isNotEmpty(query.getBusinessKey())) {
+            taskQuery.processDefinitionKey(query.getBusinessKey());
+        }
+        if (StringUtils.isNotNull(query.getBeginDate())) {
+            taskQuery.taskCreatedBefore(query.getBeginDate()).taskCreatedAfter(query.getEndDate());
+        }
 
+        List<Task> tasks = taskQuery.orderByTaskCreateTime().desc().listPage(firstResult, query.getPageSize());
         List<ProcessTodoDto> list = Lists.newArrayListWithCapacity(tasks.size());
 
         ProcessTodoDto dto;
@@ -132,17 +156,7 @@ public class WorkflowServiceImpl implements IWorkflowService, IWorkflowServiceAp
             dto.setProcessInstanceId(task.getProcessInstanceId());
             dto.setProcessDefinitionId(task.getProcessDefinitionId());
             dto.setTaskName(task.getName());
-            SysUser userInfo = getUserInfo(task.getProcessInstanceId());
-
-            if (userInfo != null) {
-                dto.setSubmitUserName(userInfo.getUserName());
-                dto.setDeptName(userInfo.getDept().getDeptName());
-            }
-            ProcessDefinition procDef = getProcDef(task.getProcessDefinitionId());
-            if (procDef != null) {
-                dto.setBusinessCode(procDef.getKey());
-                dto.setProcessName(procDef.getName());
-            }
+            buildSubmitterInfo(dto, task.getProcessInstanceId(), task.getProcessDefinitionId(), task);
 
             list.add(dto);
         }
@@ -150,19 +164,70 @@ public class WorkflowServiceImpl implements IWorkflowService, IWorkflowServiceAp
         return list;
     }
 
+    /**
+     * 补全提交人信息
+     *
+     * @param dto
+     * @param processInstanceId
+     * @param processDefinitionId
+     */
+    private void buildSubmitterInfo(ProcessTodoDto dto, String processInstanceId, String processDefinitionId, Task task) {
+        SysUser userInfo = getUserInfo(processInstanceId, task);
+
+        if (userInfo != null) {
+            dto.setSubmitUserName(userInfo.getUserName());
+            dto.setDeptName(userInfo.getDept().getDeptName());
+        }
+
+        ProcessDefinition procDef = getProcDef(processDefinitionId);
+        if (procDef != null) {
+            dto.setBusinessCode(procDef.getKey());
+            dto.setProcessName(procDef.getName());
+        }
+    }
+
+    @Override
+    public List<ProcessTodoDto> queryApproved(WorkflowQuery query) {
+        query.setSubmitterNodeName(WorkflowConstant.SUBMITTER);
+        List<ProcessTodoDto> processTodoDtos = actWorkflowRepository.queryApproved(query);
+
+        for (ProcessTodoDto processTodoDto : processTodoDtos) {
+            buildSubmitterInfo(processTodoDto, processTodoDto.getProcessInstanceId(),
+                    processTodoDto.getProcessDefinitionId(), null);
+        }
+
+        return processTodoDtos;
+    }
+
     @Override
     public ProcessTodoDto queryTodoDetail(String taskId) {
         Task tasks = taskService.createTaskQuery()
                 .taskId(taskId).singleResult();
+        ProcessTodoDto todoDto = new ProcessTodoDto();
+        String processDefinition = null;
+
         if (tasks == null) {
-            return null;
+            HistoricTaskInstance historicTaskInstance = historyService.createHistoricTaskInstanceQuery()
+                    .taskId(taskId).singleResult();
+            if (historicTaskInstance == null) {
+                return null;
+            }
+            processDefinition = historicTaskInstance.getProcessDefinitionId();
+            todoDto.setAssignee(historicTaskInstance.getAssignee());
+            todoDto.setCaseInstanceId(historicTaskInstance.getCaseInstanceId());
+            todoDto.setProcessInstanceId(historicTaskInstance.getProcessInstanceId());
+            todoDto.setEndTime(historicTaskInstance.getEndTime());
+        } else {
+            processDefinition = tasks.getProcessDefinitionId();
+            todoDto.setAssignee(tasks.getAssignee());
+            todoDto.setCaseInstanceId(tasks.getCaseInstanceId());
+            todoDto.setProcessInstanceId(tasks.getProcessInstanceId());
+
         }
 
-        ExpandProcessDto expandProcessDto = actExpandProcessService.detailByProcessDefinition(tasks.getProcessDefinitionId());
-        ProcessTodoDto todoDto = new ProcessTodoDto();
+        ExpandProcessDto expandProcessDto = actExpandProcessService.detailByProcessDefinition(processDefinition);
+
         todoDto.setTaskId(taskId);
-        todoDto.setCaseInstanceId(tasks.getCaseInstanceId());
-        todoDto.setProcessInstanceId(tasks.getProcessInstanceId());
         todoDto.setViewPath(expandProcessDto.getViewPath());
         todoDto.setBusinessCode(expandProcessDto.getBusinessCode());
 
@@ -170,16 +235,23 @@ public class WorkflowServiceImpl implements IWorkflowService, IWorkflowServiceAp
     }
 
     @Override
-    public  List<ApprovalRecordDto> queryApprovalRecord(String processInstanceId) {
+    public List<ApprovalRecordDto> queryApprovalRecord(String processInstanceId) {
         return actWorkflowRepository.queryApprovalTodo(processInstanceId);
     }
 
     @Override
     public long queryTodoCount(WorkflowQuery query) {
-        long count = taskService.createTaskQuery()
-                .taskAssignee(query.getUserId()).count();
+        TaskQuery taskQuery = taskService.createTaskQuery();
+        taskQuery.taskAssignee(query.getUserId());
 
-        return count;
+        if (StringUtils.isNotEmpty(query.getBusinessKey())) {
+            taskQuery.processDefinitionKey(query.getBusinessKey());
+        }
+        if (StringUtils.isNotNull(query.getBeginDate())) {
+            taskQuery.taskCreatedBefore(query.getBeginDate()).taskCreatedAfter(query.getEndDate());
+        }
+
+        return taskQuery.count();
     }
 
     @Override
@@ -205,23 +277,27 @@ public class WorkflowServiceImpl implements IWorkflowService, IWorkflowServiceAp
         Map<String, Object> variables = runtimeService.getVariables(task.getExecutionId());
         String jsonStr = variables.get(WorkflowConstant.APPROVAL_NODE_PROPS).toString();
 
-        JSONObject jsonObject = JSONObject.parseObject(jsonStr.toString());
+        JSONObject jsonObject = JSONObject.parseObject(jsonStr);
         //获取节点配置参数
         ProcessGroupProps props = jsonObject.getObject(task.getTaskDefinitionKey(), ProcessGroupProps.class);
         WorkflowInstance instance = new WorkflowInstance(dto, processEngine);
 
         Comment comment;
-        /**
-         * 驳回
-         */
-        if (ApprovalResultEnum.REJECT.toString().equals(dto.getResult())) {
+        WorkflowApprovalResultMsg msg = null;
+        //驳回
+        if (ApprovalActionEnum.REJECT.toString().equals(dto.getResult())) {
             comment = instance.refuse(task, props);
+            msg= WorkflowApprovalResultMsg.passMsg(dto.getBusiness(),
+                    task.getCaseInstanceId());
         } else {
             comment = instance.pass(task, props);
+            msg = WorkflowApprovalResultMsg.rejectMsg(dto.getBusiness(),
+                    task.getCaseInstanceId());
         }
+        notifyObserver(msg);
 
         //更新 comment
-        actWorkflowRepository.saveApprovalResultComment(ApprovalResultEnum.REJECT.toString(), comment.getId());
+        actWorkflowRepository.saveApprovalResultComment(ApprovalActionEnum.REJECT.toString(), comment.getId());
         return "";
     }
 
@@ -236,7 +312,8 @@ public class WorkflowServiceImpl implements IWorkflowService, IWorkflowServiceAp
      * @throws IllegalArgumentException
      * @throws InvocationTargetException
      */
-    private Object invokeMethod(Object object, String methodName, String initiator) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException,
+    private Object invokeMethod(Object object, String methodName, String initiator) throws NoSuchMethodException,
+            SecurityException, IllegalAccessException, IllegalArgumentException,
             InvocationTargetException {
         Method method = object.getClass().getMethod(methodName, String.class);
         Object invoke = method.invoke(object, initiator);
@@ -244,15 +321,27 @@ public class WorkflowServiceImpl implements IWorkflowService, IWorkflowServiceAp
         return invoke;
     }
 
-    private SysUser getUserInfo(String processInstanceId) {
+    private SysUser getUserInfo(String processInstanceId, Task task) {
+        Object submitter = null;
+        //待办中获取 提交人信息
+        if (task != null) {
+            VariableInstance starter = runtimeService.createVariableInstanceQuery()
+                    .processInstanceIdIn(processInstanceId)
+                    .variableName("starter").singleResult();
+            submitter = starter.getValue();
 
-        VariableInstance starter = runtimeService.createVariableInstanceQuery()
-                .processInstanceIdIn(processInstanceId)
-                .variableName("starter").singleResult();
-        Object value = starter.getTypedValue().getValue();
-        if (value != null) {
-            return sysCommonService.getUserById(Long.parseLong(value.toString()));
+        } else {
+            HistoricVariableInstance starter = historyService.createHistoricVariableInstanceQuery()
+                    .processInstanceIdIn(processInstanceId)
+                    .variableName("starter").singleResult();
+
+            submitter = starter.getTypedValue().getValue();
         }
+
+        if (submitter != null) {
+            return sysCommonService.getUserById(Long.parseLong(submitter.toString()));
+        }
+
         return null;
     }
 

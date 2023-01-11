@@ -4,7 +4,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.rouyi.flow.repo.dao.IActWorkflowDao">
 
-    <resultMap id="approvalDotoMap" type="com.rouyi.flow.domain.dto.ApprovalRecordDto">
+    <resultMap id="approvalRecordDto" type="com.rouyi.flow.domain.dto.ApprovalRecordDto">
          <result  column="FULL_MSG_"   property="comment"     />
          <result  column="TIME_"   property="time"     />
          <result  column="APPROVAL_RESULT"   property="approvalResult"     />
@@ -12,16 +12,43 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
          <result  column="NAME_"   property="taskName"     />
     </resultMap>
 
+    <resultMap id="processApproved" type="com.rouyi.flow.domain.dto.ProcessTodoDto">
+        <result  column="PROC_DEF_ID_"   property="processDefinitionId"     />
+        <result  column="CASE_INST_ID_"   property="caseInstanceId"     />
+        <result  column="PROC_INST_ID_"   property="processInstanceId"     />
+        <result  column="business_name"   property="businessName"     />
+        <result  column="PROC_DEF_KEY_"   property="businessCode"     />
+        <result  column="NAME_"   property="processName"     />
+        <result  column="END_TIME_"   property="endTime"     />
+        <result  column="ID_"   property="taskId"     />
+    </resultMap>
+
     <update id="updateComment" >
         update ACT_HI_COMMENT set APPROVAL_RESULT=#{approvalResult} where ID_=#{commentId}
     </update>
     
-    <select id="queryApprovalTodo" resultMap="approvalDotoMap">
+    <select id="queryApprovalTodo" resultMap="approvalRecordDto">
 
         select A.ID_, A.FULL_MSG_, A.TIME_, A.REMOVAL_TIME_, ssu.user_name,  A.APPROVAL_RESULT, AHT.NAME_, ASSIGNEE_, DELETE_REASON_, DURATION_
         from ACT_HI_COMMENT A
         left join     ACT_HI_TASKINST AHT on A.TASK_ID_ = AHT.ID_
         left join     sys_user ssu on AHT.ASSIGNEE_ = ssu.user_id
         where A.PROC_INST_ID_=#{processInstanceId}
+    </select>
+
+    <select id="queryApproved" resultMap="processApproved">
+        select distinct A.ID_, PROC_DEF_ID_,CASE_INST_ID_, PROC_DEF_KEY_, PROC_INST_ID_,
+                        B.business_name, A.END_TIME_,
+                         procdef.NAME_ from ACT_HI_TASKINST A
+                        left join t_act_expand_business B on A.PROC_DEF_KEY_=B.business_code
+                        left join ACT_RE_PROCDEF procdef on A.PROC_DEF_ID_=procdef.ID_
+        where ASSIGNEE_=#{userId} and A.TASK_DEF_KEY_ not  like 'Submitter%'
+        <if test="businessKey != '' and businessKey !=null ">
+            and A.PROC_DEF_KEY_ = #{businessKey}
+        </if>
+        <if test="beginDate !=null ">
+            and A.END_TIME_ between #{beginDate} and #{endDate}
+        </if>
+        order by  A.END_TIME_ desc
     </select>
 </mapper> 

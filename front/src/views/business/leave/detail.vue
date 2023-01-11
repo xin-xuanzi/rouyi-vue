@@ -110,7 +110,6 @@ async function queryLeaveDerail() {
 
 onMounted(() => {
   queryLeaveDerail()
-  console.log(1)
 })
 
 

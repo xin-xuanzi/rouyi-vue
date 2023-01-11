@@ -1,9 +1,8 @@
 package com.ruoyi.common.core.domain.model;
 
-import com.ruoyi.common.enums.ApprovalResultEnum;
-import com.ruoyi.common.utils.bean.BeanUtils;
+import com.ruoyi.common.enums.ApprovalActionEnum;
 
-import java.util.Map;
+import java.io.Serializable;
 
 /**
  * 审批结果 Msg
@@ -11,26 +10,58 @@ import java.util.Map;
  * @author xuanzi
  * @date 2022/12/14 18:50
  */
-public class WorkflowApprovalResultMsg {
+public class WorkflowApprovalResultMsg implements Serializable {
+    /**
+     * 业务编码
+     */
     private String businessCode;
-    private ApprovalResultEnum approvalResult;
-    private Long approver;
+    /**
+     * 审批动作
+     */
+    private String approvalResult;
+    /**
+     *
+     */
+    private String businessId;
 
     public WorkflowApprovalResultMsg() {
     }
 
-    public WorkflowApprovalResultMsg(String businessCode, ApprovalResultEnum approvalResult, Long approver) {
+    public WorkflowApprovalResultMsg(String businessCode, String approvalResult, String businessId) {
         this.businessCode = businessCode;
         this.approvalResult = approvalResult;
-        this.approver = approver;
+        this.businessId = businessId;
     }
 
-    public Map<String, Object> toMap() {
-        return BeanUtils.fastJsonBean2Map(this);
+    public String getBusinessCode() {
+        return businessCode;
     }
 
-    public static WorkflowApprovalResultMsg toBean(Map<String, Object> map) {
-        return BeanUtils.map2Bean(map, WorkflowApprovalResultMsg.class);
+    public String getApprovalResult() {
+        return approvalResult;
     }
 
+    public String getBusinessId() {
+        return businessId;
+    }
+
+    public static WorkflowApprovalResultMsg tempMsg() {
+        return new WorkflowApprovalResultMsg("TEST", ApprovalActionEnum.REJECT.toString(), "-100");
+    }
+
+    public static WorkflowApprovalResultMsg passMsg(String businessCode, String businessId) {
+        return new WorkflowApprovalResultMsg(businessCode, ApprovalActionEnum.PASS.toString(), businessId);
+    }
+    public static WorkflowApprovalResultMsg rejectMsg(String businessCode, String businessId) {
+        return new WorkflowApprovalResultMsg(businessCode, ApprovalActionEnum.REJECT.toString(), businessId);
+    }
+
+    @Override
+    public String toString() {
+        return "WorkflowApprovalResultMsg{" +
+                "businessCode='" + businessCode + '\'' +
+                ", approvalResult='" + approvalResult + '\'' +
+                ", businessId='" + businessId + '\'' +
+                '}';
+    }
 }

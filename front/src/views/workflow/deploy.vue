@@ -26,6 +26,12 @@
           </template>
         </el-table-column>
         <el-table-column prop="version" label="版本"/>
+        <el-table-column prop="version" label="历史版本">
+          <template #default="scope">
+            <el-link type="primary" @click="showHistory(scope.row.expandProcessId)">历史版本</el-link>
+          </template>
+
+        </el-table-column>
         <el-table-column prop="deployTime" label="部署时间"/>
         <el-table-column prop="createTime" label="创建时间"/>
         <el-table-column label="操作">
@@ -66,6 +72,14 @@
       <design :fullscreen="fullscreen" @deploySuccess="deploySuccess"
               :act-expand-process-id="actExpandProcessId"/>
     </el-dialog>
+
+    <el-dialog v-model="dialogShowHistory" title="历史版本">
+      <el-table v-loading="loading" :data="historyData">
+        <el-table-column property="name" label="名称"/>
+        <el-table-column property="version" label="版本" />
+        <el-table-column property="createTime" label="创建时间" />
+      </el-table>
+    </el-dialog>
   </div>
 </template>
 
@@ -73,14 +87,16 @@
 import {businessGroup} from "@/api/flowProcess/business";
 import Design from "@/views/workflow/design";
 import {nextTick} from "vue";
-import {changeStatus} from "@/api/flowProcess/flowProcess";
+import {changeStatus, queryHistory} from "@/api/flowProcess/flowProcess";
 let { proxy } = getCurrentInstance();
 
 const router = useRouter();
 
 const businesstList = ref([]);
+const historyData = ref([]);
 const loading = ref(true);
 const dialogTableVisible = ref(false)
+const dialogShowHistory = ref(false)
 const fullscreen = ref(false)
 const actExpandProcessId = ref(null)
 
@@ -121,6 +137,15 @@ function handleUpdate(id) {
   actExpandProcessId.value = id
   nextTick(() => {
     dialogTableVisible.value = true;
+  })
+}
+
+function showHistory(expandProcessId) {
+  loading.value = true;
+  dialogShowHistory.value = true;
+  queryHistory(expandProcessId).then(res => {
+    historyData.value = res.data;
+    loading.value = false;
   })
 }
 function closed() {

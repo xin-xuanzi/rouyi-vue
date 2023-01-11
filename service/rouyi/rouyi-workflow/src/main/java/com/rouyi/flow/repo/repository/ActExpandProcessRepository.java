@@ -7,14 +7,17 @@ import com.rouyi.flow.domain.ExpandProcess;
 import com.rouyi.flow.domain.dto.ExpandProcessDto;
 import com.rouyi.flow.repo.dao.ActExpandBusinessRelationDao;
 import com.rouyi.flow.repo.dao.ActExpandProcessDao;
+import com.rouyi.flow.repo.dao.ActHiExpandProcessDao;
 import com.rouyi.flow.repo.dao.po.ActExpandBusinessRelationPo;
 import com.rouyi.flow.repo.dao.po.ActExpandProcessPo;
+import com.rouyi.flow.repo.dao.po.ActHiExpandProcessPo;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author xuanzi
@@ -25,6 +28,7 @@ import java.util.List;
 public class ActExpandProcessRepository {
 
     private ActExpandProcessDao actExpandProcessDao;
+    private ActHiExpandProcessDao actHiExpandProcessDao;
     private ActExpandBusinessRelationDao actExpandBusinessRelationDao;
 
     public void changeStatus(ExpandProcess expandProcess) {
@@ -59,6 +63,46 @@ public class ActExpandProcessRepository {
         relationPo.setExpandProcessId(po.getId());
         relationPo.setBusinessCode(expandProcess.getBusinessCode());
         actExpandBusinessRelationDao.insert(relationPo);
+    }
+
+    /**
+     * 保存历史流程信息
+     * @param expandProcess
+     */
+    public void saveHiExpandProcess(ExpandProcess expandProcess) {
+        if (expandProcess.getId() == null) {
+            return;
+        }
+
+        ActExpandProcessPo actExpandProcessPo = actExpandProcessDao.selectById(expandProcess.getId());
+        ActHiExpandProcessPo po = new ActHiExpandProcessPo();
+        BeanUtils.copyProperties(actExpandProcessPo, po);
+        po.setId(null);
+        po.setExpandProcessId(actExpandProcessPo.getId());
+        actHiExpandProcessDao.insert(po);
+    }
+
+    /**
+     * 查询流程历史信息
+     * @param expandProcess
+     * @return
+     */
+    public List<ExpandProcessDto> queryHiExpandProcess(Long expandProcessId) {
+        List<ActHiExpandProcessPo> actHiExpandProcessPos = actHiExpandProcessDao.selectList(new LambdaQueryWrapper<ActHiExpandProcessPo>()
+                .eq(ActHiExpandProcessPo::getExpandProcessId, expandProcessId)
+                .orderByDesc(ActHiExpandProcessPo::getVersion));
+
+        List<ExpandProcessDto> list = Lists.newArrayListWithCapacity(actHiExpandProcessPos.size());
+        AtomicReference<ExpandProcessDto> dto = new AtomicReference<>();
+        actHiExpandProcessPos.forEach(e -> {
+            dto.set(new ExpandProcessDto());;
+            dto.get().setVersion(e.getVersion());
+            dto.get().setCreateTime(e.getCreateTime());
+            dto.get().setName(e.getName());
+            list.add(dto.get());
+        });
+
+        return list;
     }
 
     public ExpandProcessDto queryDetail(Long actExpandProcessId) {

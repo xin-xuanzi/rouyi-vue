@@ -2,6 +2,7 @@ package com.ruoyi.business.leave.service;
 
 import com.ruoyi.business.leave.domain.LeaveDto;
 import com.ruoyi.business.leave.domain.LeaveQuery;
+import com.ruoyi.common.core.domain.model.WorkflowApprovalResultMsg;
 
 import java.util.List;
 
@@ -21,4 +22,10 @@ public interface ILeaveService {
 
     LeaveDto queryDetail(Long id);
 
+
+    /**
+     * 审批后置处理，包括审批驳回，通过。
+     * @param resultMsg
+     */
+    void approvePostProcessing(WorkflowApprovalResultMsg resultMsg);
 }

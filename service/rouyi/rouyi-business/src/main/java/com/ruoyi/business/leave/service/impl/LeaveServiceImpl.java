@@ -4,6 +4,8 @@ import com.ruoyi.business.leave.domain.LeaveDto;
 import com.ruoyi.business.leave.domain.LeaveQuery;
 import com.ruoyi.business.leave.repo.LeaveRepository;
 import com.ruoyi.business.leave.service.ILeaveService;
+import com.ruoyi.common.core.domain.model.WorkflowApprovalResultMsg;
+import com.ruoyi.common.enums.ApprovalActionEnum;
 import com.ruoyi.common.workflow.IWorkflowServiceApi;
 import com.ruoyi.common.workflow.WorkflowStartParam;
 import lombok.AllArgsConstructor;
@@ -28,7 +30,7 @@ public class LeaveServiceImpl implements ILeaveService {
 
         WorkflowStartParam param = new WorkflowStartParam();
         param.setBusinessKey(dto.getBusinessKey());
-        param.setInitiator(dto.getUserId().toString());
+        param.setInitiator(String.valueOf(dto.getUserId()));
         param.setCaseInstanceId(dto.getId().toString());
         param.setProcessDefinitionId(dto.getProcessDefinitionId());
         param.setFromData(dto);
@@ -44,5 +46,12 @@ public class LeaveServiceImpl implements ILeaveService {
     @Override
     public LeaveDto queryDetail(Long id) {
         return leaveRepository.queryDetail(id);
+    }
+
+    @Override
+    public void approvePostProcessing(WorkflowApprovalResultMsg resultMsg) {
+        if(ApprovalActionEnum.REJECT.equals(resultMsg.getApprovalResult())) {
+            leaveRepository.updateStatus(Long.parseLong(resultMsg.getBusinessId()), "99");
+        }
     }
 }

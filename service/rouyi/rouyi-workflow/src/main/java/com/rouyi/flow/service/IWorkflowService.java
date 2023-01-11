@@ -25,6 +25,13 @@ public interface IWorkflowService {
     String startWorkflow(WorkflowDto workflowDto) throws Exception;
 
     List<ProcessTodoDto> queryTodo(WorkflowQuery query);
+
+    /**
+     * 查修你已审批
+     * @param query
+     * @return
+     */
+    List<ProcessTodoDto> queryApproved(WorkflowQuery query);
     ProcessTodoDto queryTodoDetail(String taskId);
     List<ApprovalRecordDto> queryApprovalRecord(String processInstanceId);
     long queryTodoCount(WorkflowQuery query);

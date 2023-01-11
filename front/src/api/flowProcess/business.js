@@ -17,11 +17,11 @@ export function businessGroup(query) {
 }
 
 // 查询 流程业务list
-export function businessEnableList() {
+export function businessEnableList(status) {
     return request({
         url: '/workflow/business/list',
         method: 'get',
-        params: {status:0}
+        params: {status}
     })
 }
 
@@ -64,6 +64,7 @@ export function businessSaveOrUpdate(data) {
 /**
  * 查询业务编码详情
  * @param id
+ * @param status
  * @returns {*}
  */
 export function changeBusinessStatus(id, status) {
@@ -75,21 +76,4 @@ export function changeBusinessStatus(id, status) {
             status,
         }
     })
-}
-
-export async function businessComponents() {
- let res =  await request({
-        url: '/workflow/business/list',
-        method: 'get',
-        params: {}
-    })
-
-    let arr = res.data;
-    component = []
-    for (let i = 0; i < arr.length; i++) {
-        const {businessCode, viewPath} = arr[i]
-        component[businessCode] = ()=>import(`@/view/${viewPath}`)
-    }
-
-    return component
 }

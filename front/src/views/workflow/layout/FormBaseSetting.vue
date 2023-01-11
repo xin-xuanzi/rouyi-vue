@@ -71,7 +71,7 @@ export default {
       return [{ required: true, message: msg, trigger: 'blur' }]
     },
     getBusinessList(){
-      businessEnableList().then(rsp => {
+      businessEnableList(0).then(rsp => {
         this.fromGroup = rsp.data
       }).catch(err => this.$message.error('获取业务分类异常'))
     },

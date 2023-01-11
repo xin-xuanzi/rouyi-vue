@@ -53,6 +53,21 @@ export function queryListByBusiness(business) {
 
 
 /**
+ * 查询流程历史版本
+ * @returns
+ */
+export function queryHistory(expandProcessId) {
+    return request({
+        url: '/workflow/history',
+        method: 'GET',
+        params: {
+            expandProcessId
+        }
+    })
+}
+
+
+/**
  * 保存流程
  * @returns
  */
@@ -94,15 +109,26 @@ export function detail(id) {
  * 查询代办信息
  * @returns
  */
-export function queryTodo() {
+export function queryTodo(params) {
     return request({
         url: '/workflow/todo',
         method: 'GET',
-        params: {}
+        params: params
     })
 }
 
 
+/**
+ * 查询已审批信息
+ * @returns
+ */
+export function queryApproved(params) {
+    return request({
+        url: '/workflow/approved',
+        method: 'GET',
+        params: params
+    })
+}
 
 /**
  * 查询代办信息
@@ -125,5 +151,18 @@ export function queryApprovalRecord(processInstanceId) {
         url: '/workflow/approvalRecord/' + processInstanceId,
         method: 'GET',
         params: {}
+    })
+}
+
+
+/**
+ * 审批
+ * @returns
+ */
+export function approve(data) {
+    return request({
+        url: '/workflow/approve',
+        method: 'POST',
+        data:data
     })
 }

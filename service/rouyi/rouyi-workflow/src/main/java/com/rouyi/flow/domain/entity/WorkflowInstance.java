@@ -71,17 +71,18 @@ public class WorkflowInstance {
 
         RefuseHandler refuse = props.getRefuse();
 
-        ProcessInstanceModificationBuilder processInstanceModification = processEngine.getRuntimeService().createProcessInstanceModification(instanceId);
+        ProcessInstanceModificationBuilder processInstanceModification = processEngine.getRuntimeService()
+                .createProcessInstanceModification(instanceId);
 
         //
-        Comment comment1 = processEngine.getTaskService().createComment(currentTask.getId(), instanceId, comment);
         switch (refuse.getType()) {
             //结束流程
             case ProcessCommonType.RefuseType.TO_END:
 
                 processInstanceModification = processInstanceModification
-                        .cancelActivityInstance(currentActivityInstance.getActivityId());
+                        .cancelActivityInstance(currentActivityInstance.getId());
 
+                break;
             //驳回到上一审批人
             case ProcessCommonType.RefuseType.TO_BEFORE:
                 HistoricActivityInstance lase = resultList.get(resultList.size() - 1);
@@ -115,6 +116,9 @@ public class WorkflowInstance {
                 }
 
                 break;
+
+            default:
+
         }
 
         processInstanceModification.execute();

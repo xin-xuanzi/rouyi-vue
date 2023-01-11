@@ -13,7 +13,7 @@ import java.util.Date;
 @Data
 public class LeaveDto {
     private Long id;
-    private Long userId;
+    private long userId;
     private Integer leaveType;
     private String userName;
     private String deptName;
