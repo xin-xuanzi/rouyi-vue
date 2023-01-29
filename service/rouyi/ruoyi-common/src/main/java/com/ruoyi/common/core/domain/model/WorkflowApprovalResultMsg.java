@@ -18,26 +18,33 @@ public class WorkflowApprovalResultMsg implements Serializable {
     /**
      * 审批动作
      */
-    private String approvalResult;
+    private ApprovalActionEnum approvalResult;
     /**
      *
      */
     private String businessId;
 
+    private int approvalResultStatus;
+
     public WorkflowApprovalResultMsg() {
     }
 
-    public WorkflowApprovalResultMsg(String businessCode, String approvalResult, String businessId) {
+    public WorkflowApprovalResultMsg(String businessCode, ApprovalActionEnum approvalResult,
+                                     String businessId) {
         this.businessCode = businessCode;
         this.approvalResult = approvalResult;
         this.businessId = businessId;
+    }
+
+    public void setApprovalResultStatus(int approvalResultStatus) {
+        this.approvalResultStatus = approvalResultStatus;
     }
 
     public String getBusinessCode() {
         return businessCode;
     }
 
-    public String getApprovalResult() {
+    public ApprovalActionEnum getApprovalResult() {
         return approvalResult;
     }
 
@@ -46,14 +53,14 @@ public class WorkflowApprovalResultMsg implements Serializable {
     }
 
     public static WorkflowApprovalResultMsg tempMsg() {
-        return new WorkflowApprovalResultMsg("TEST", ApprovalActionEnum.REJECT.toString(), "-100");
+        return new WorkflowApprovalResultMsg("TEST", ApprovalActionEnum.REJECT, "-100");
     }
 
     public static WorkflowApprovalResultMsg passMsg(String businessCode, String businessId) {
-        return new WorkflowApprovalResultMsg(businessCode, ApprovalActionEnum.PASS.toString(), businessId);
+        return new WorkflowApprovalResultMsg(businessCode, ApprovalActionEnum.PASS, businessId);
     }
     public static WorkflowApprovalResultMsg rejectMsg(String businessCode, String businessId) {
-        return new WorkflowApprovalResultMsg(businessCode, ApprovalActionEnum.REJECT.toString(), businessId);
+        return new WorkflowApprovalResultMsg(businessCode, ApprovalActionEnum.REJECT, businessId);
     }
 
     @Override

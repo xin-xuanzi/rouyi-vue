@@ -39,6 +39,18 @@ public class ActExpandProcessRepository {
         actExpandProcessDao.update(null, lambdaUpdateWrapper);
     }
 
+    public void updateActProcess(ExpandProcess expandProcess) {
+        ActExpandProcessPo po = new ActExpandProcessPo();
+        po.setId(expandProcess.getId());
+        if (expandProcess.getProcessDefinition() != null) {
+            po.setActProcessId(expandProcess.getProcessDefinition().getId());
+            po.setActDeploymentId(expandProcess.getProcessDefinition().getDeploymentId());
+            po.setVersion(expandProcess.getProcessDefinition().getVersion());
+            po.setDeployTime(new Date());
+        }
+
+        actExpandProcessDao.updateById(po);
+    }
     public void saveExpandProcess(ExpandProcess expandProcess) {
         ActExpandProcessPo po = new ActExpandProcessPo();
 
@@ -54,6 +66,7 @@ public class ActExpandProcessRepository {
             actExpandProcessDao.updateById(po);
         } else {
             actExpandProcessDao.insert(po);
+            expandProcess.setId(po.getId());
         }
 
         //保存 businessKey 关联

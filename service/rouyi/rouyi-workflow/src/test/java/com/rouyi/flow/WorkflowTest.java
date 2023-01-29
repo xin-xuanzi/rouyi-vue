@@ -1,7 +1,9 @@
 package com.rouyi.flow;
 
+import com.rouyi.flow.config.WorkflowConstant;
 import com.rouyi.flow.config.parser.ExpandProcessParser;
 import com.rouyi.flow.domain.ExpandProcess;
+import com.ruoyi.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
@@ -16,7 +18,10 @@ import java.io.*;
 public class WorkflowTest {
 
     public static void main(String[] args)throws Exception {
-        test001();
+        String split = StringUtils.substring("Approval-pre-process_node_12312", WorkflowConstant.APPROVAL_PRE_INTERMEDIATE_THROW_EVENT.length());
+        System.out.println(" ===>>>"+split);
+
+        //test001();
 //        Class<?> aClass = Class.forName("com.rouyi.flow.service.IWorkflowVariableInvokeService");
 //        Method[] classMethods = aClass.getMethods();
 //        for (Method classMethod : classMethods) {

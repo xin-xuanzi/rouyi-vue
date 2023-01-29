@@ -63,6 +63,8 @@ public class ActExpandProcessServiceImpl  implements IActExpandProcessService {
 
         BeanUtils.copyProperties(dto, expandProcess);
         expandProcess.setStatus(WorkflowStatus.DEPLOY.getCode());
+        actExpandProcessRepository.saveExpandProcess(expandProcess);
+
         ExpandProcessParser expandProcessParser = new ExpandProcessParser(expandProcess);
         BpmnModelInstance bpmnModelInstance = expandProcessParser.parse();
 
@@ -74,10 +76,10 @@ public class ActExpandProcessServiceImpl  implements IActExpandProcessService {
 
         //保存流程配置
         expandProcess.setProcessDefinition(processDefinition);
+        actExpandProcessRepository.updateActProcess(expandProcess);
 
         //保存历史流程信息
         actExpandProcessRepository.saveHiExpandProcess(expandProcess);
-        actExpandProcessRepository.saveExpandProcess(expandProcess);
     }
 
     @Override
@@ -129,7 +131,6 @@ public class ActExpandProcessServiceImpl  implements IActExpandProcessService {
             map.put("activityType",matching(historicActivityInstance.getActivityType()));
             map.put("assignee",historicActivityInstance.getAssignee()==null?"无":historicActivityInstance.getAssignee());
             map.put("startTime", DateFormatUtils.format(historicActivityInstance.getStartTime(),"yyyy-MM-dd HH:mm:ss") );
-
 
             if (historicActivityInstance.getEndTime() != null) {
                 map.put("endTime",DateFormatUtils.format(historicActivityInstance.getEndTime(),"yyyy-MM-dd HH:mm:ss"));

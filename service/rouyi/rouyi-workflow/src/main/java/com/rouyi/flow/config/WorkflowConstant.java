@@ -29,6 +29,4 @@ public class WorkflowConstant {
      * 提交人
      */
     public static final String SUBMITTER = "Submitter_12312";
-
-
 }

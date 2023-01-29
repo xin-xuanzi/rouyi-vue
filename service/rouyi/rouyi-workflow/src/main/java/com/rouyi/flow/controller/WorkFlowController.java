@@ -11,7 +11,6 @@ import com.rouyi.flow.service.IActExpandProcessService;
 import com.rouyi.flow.service.IWorkflowService;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
-import com.ruoyi.common.core.domain.model.WorkflowApprovalResultMsg;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.redis.RedisService;
 import lombok.AllArgsConstructor;
@@ -211,19 +210,6 @@ public class WorkFlowController extends BaseController {
         return AjaxResult.success();
     }
 
-
-
-    /**
-     * 审批代办
-     *
-     * @param
-     * @return
-     */
-    @PostMapping("/test")
-    public AjaxResult test() {
-        redisService.workflowSendMsg(WorkflowApprovalResultMsg.rejectMsg("123", "123"));
-        return AjaxResult.success();
-    }
 
 
 }

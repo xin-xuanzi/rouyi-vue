@@ -25,7 +25,7 @@ public class WorkflowTest extends BaseJunit{
     @Autowired
     private IWorkflowService workflowService;
 
-    private String PROCESS_INSTANCE_ID = "6e450431-6635-11ed-b6c2-c6bde56990c4";
+    private String PROCESS_INSTANCE_ID = "e1de986e-948b-11ed-a535-c6bde56990c4";
 
     @Test
     public void startWorkflow() throws Exception {
@@ -92,8 +92,8 @@ public class WorkflowTest extends BaseJunit{
     public void complete() {
         WorkflowQuery query = new WorkflowQuery();
         query.setProcessInstanceId(PROCESS_INSTANCE_ID);
-        query.setBusinessKey("LEAVE");
-        query.setUserId("lisi");
+        query.setBusinessKey("demo");
+        query.setUserId("A");
 
         workflowService.complete(query);
     }

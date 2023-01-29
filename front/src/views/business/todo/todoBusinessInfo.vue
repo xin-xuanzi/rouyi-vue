@@ -1,6 +1,6 @@
 <template>
 
-  <div  >
+  <div >
     <component  :is="currentTabComponent" :id="businessId"></component>
 
     <div class="btn-group" v-if="loginUserId === assignee && endTime == null">
@@ -8,7 +8,7 @@
       <el-button type="success" @click="pass">同意</el-button>
     </div>
 
-    <approval-record v-if="processInstanceId" :process-instance-id="processInstanceId"></approval-record>
+    <approval-record v-if="showRecord" :process-instance-id="processInstanceId"></approval-record>
 
     <el-dialog  v-model="rejectDialog" title="驳回意见">
       <div class="el-item">
@@ -54,10 +54,10 @@ const comment = ref("");
 const endTime = ref(null);
 const loading = ref(true);
 const rejectDialog = ref(false);
+const showRecord = ref(false);
 const currentTabComponent = shallowRef(null);
 const processInstanceId = ref(null);
-console.log(loginUserId)
-console.log(assignee.value)
+const businessCode = ref(null);
 
 const props = defineProps({
   taskId:String
@@ -74,12 +74,17 @@ async function getTodo() {
     businessId.value = res.data.caseInstanceId
     assignee.value = res.data.assignee
     endTime.value = res.data.endTime
+    businessCode.value = res.data.businessCode
+
     await nextTick(() =>{
       loginUserId.value = useUserStore().userId;
       loading.value = false;
+      processInstanceId.value = res.data.processInstanceId
+      showRecord.value = true;
+      
       emits('showEmpty', false)
     })
-    processInstanceId.value = res.data.processInstanceId
+
     viewPath.value = res.data.viewPath
     let val = businessComponents[res.data.businessCode];
     currentTabComponent.value = defineAsyncComponent(val);
@@ -90,7 +95,7 @@ async function getTodo() {
 function buildApproveData() {
     return {
       processInstance: processInstanceId.value,
-      business: processInstanceId.value,
+      business: businessCode.value,
     }
 }
 function showRejectDialog() {
@@ -106,11 +111,22 @@ function reject() {
     return;
   }
 
+  proxy.$modal.loading("正在提交");
+
   let result = buildApproveData();
   result.result = 'REJECT';
   result.comment = comment.value;
   approve(result).then(res => {
-    console.log(res);
+    proxy.$modal.closeLoading();
+    proxy.$modal.msgSuccess("审批成功");
+    comment.value = '';
+    endTime.value = new Date();
+    showRecord.value = false;
+    nextTick(() =>{
+      showRecord.value = true;
+    })
+    rejectDialog.value = false;
+
   })
 }
 
@@ -120,7 +136,23 @@ function reject() {
  * 同意
  */
 function pass() {
+  proxy.$modal.loading("正在提交");
 
+  let result = buildApproveData();
+  result.result = 'PASS';
+  result.comment = "同意";
+  approve(result).then(res => {
+    proxy.$modal.closeLoading();
+    proxy.$modal.msgSuccess("审批成功");
+    comment.value = '';
+    endTime.value = new Date();
+    showRecord.value = false;
+    nextTick(() =>{
+      showRecord.value = true;
+    })
+    rejectDialog.value = false;
+
+  })
 }
 
 getTodo()

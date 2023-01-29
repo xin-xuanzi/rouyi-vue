@@ -248,7 +248,9 @@ function resetFrom() {
   proxy.resetForm("leaveRef");
 }
 function handleSelectionChange() {}
-function handleQuery() {}
+function handleQuery() {
+  getList()
+}
 function resetQuery() {}
 function handleAdd() {
   resetFrom();
@@ -272,7 +274,7 @@ function cancel() {
   open.value = false;
 }
 function getList() {
-  listLeave(queryParams).then(res => {
+  listLeave(queryParams.value).then(res => {
     dataList.value = res.rows
     total.value = Number(res.total)
   })

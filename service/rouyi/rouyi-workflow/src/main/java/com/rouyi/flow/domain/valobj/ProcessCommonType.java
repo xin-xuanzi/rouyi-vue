@@ -162,6 +162,11 @@ public class ProcessCommonType {
          */
         public static final String TO_NODE = "TO_NODE";
 
+        /**
+         * 驳回到提交人
+         */
+        public static final String TO_SUBMITTER = "TO_SUBMITTER";
+
     }
 
 

@@ -8,7 +8,8 @@
       <el-timeline-item  :timestamp="item.time" placement="top" v-for="item in record">
         <el-card>
           <div>
-            <el-tag >同 意</el-tag>
+            <el-tag type="danger" v-if="item.approvalResult === 'REJECT'">驳 回</el-tag>
+            <el-tag v-else>同 意</el-tag>
             <span class="fs-1 ml10" >{{item.taskName}}</span>
             <span class="fs-2"> {{item.userName || '张珊'}}</span>
 

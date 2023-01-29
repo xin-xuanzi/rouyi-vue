@@ -54,7 +54,7 @@ public class ExpandProcessParser {
             return null;
         }
 
-        processBuilder = Bpmn.createExecutableProcess(expandProcess.getBusinessCode())
+        processBuilder = Bpmn.createExecutableProcess(expandProcess.getBusinessCode() + expandProcess.getId())
                 .name(expandProcess.getName());
 
         AbstractFlowNodeBuilder nodeBuilder = null;

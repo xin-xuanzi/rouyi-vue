@@ -18,6 +18,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <select id="queryList" resultMap="leaveDto">
         select A.*, su.nick_name user_name from t_leave A
         left join sys_user su on A.user_id = su.user_id
+        order by A.id desc
     </select>
 
 </mapper> 

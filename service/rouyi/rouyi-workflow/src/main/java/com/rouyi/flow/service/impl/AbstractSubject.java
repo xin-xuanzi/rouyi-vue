@@ -20,6 +20,10 @@ public abstract class AbstractSubject {
      * @param observer
      */
     public void add(ApproveObserver observer) {
+        if (observers.contains(observer)) {
+            return;
+        }
+
         observers.add(observer);
     }
 

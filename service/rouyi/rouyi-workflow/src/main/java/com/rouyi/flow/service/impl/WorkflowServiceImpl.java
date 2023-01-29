@@ -12,16 +12,14 @@ import com.rouyi.flow.domain.dto.ExpandProcessDto;
 import com.rouyi.flow.domain.dto.ProcessTodoDto;
 import com.rouyi.flow.domain.dto.ProcessVariableDto;
 import com.rouyi.flow.domain.entity.WorkflowInstance;
+import com.rouyi.flow.domain.valobj.ApproveResult;
 import com.rouyi.flow.domain.valobj.ProcessGroupProps;
 import com.rouyi.flow.repo.repository.ActWorkflowRepository;
 import com.rouyi.flow.service.ApproveObserver;
 import com.rouyi.flow.service.IActExpandProcessService;
 import com.rouyi.flow.service.IWorkflowService;
 import com.ruoyi.common.core.domain.entity.SysUser;
-import com.ruoyi.common.core.domain.model.WorkflowApprovalResultMsg;
-import com.ruoyi.common.core.redis.RedisService;
 import com.ruoyi.common.core.service.ISysCommonService;
-import com.ruoyi.common.enums.ApprovalActionEnum;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.spring.SpringUtils;
 import com.ruoyi.common.workflow.IWorkflowServiceApi;
@@ -34,7 +32,6 @@ import org.camunda.bpm.engine.history.HistoricVariableInstance;
 import org.camunda.bpm.engine.repository.ProcessDefinition;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
 import org.camunda.bpm.engine.runtime.VariableInstance;
-import org.camunda.bpm.engine.task.Comment;
 import org.camunda.bpm.engine.task.Task;
 import org.camunda.bpm.engine.task.TaskQuery;
 import org.springframework.stereotype.Service;
@@ -72,8 +69,6 @@ public class WorkflowServiceImpl extends AbstractSubject implements IWorkflowSer
 
     private ActWorkflowRepository actWorkflowRepository;
 
-    private RedisService redisService;
-
     private ApproveObserver approveObserver;
 
     @PostConstruct
@@ -85,7 +80,9 @@ public class WorkflowServiceImpl extends AbstractSubject implements IWorkflowSer
     public String startWorkflow(WorkflowDto workflowDto) throws Exception {
         ExpandProcessDto expandProcessDto = actExpandProcessService.detailByProcessDefinition(workflowDto.getProcessDefinitionId());
         //保存流程变量 nodeProps
+        workflowDto.setBusinessKey(expandProcessDto.getBusinessCode());
         workflowDto.getParams().put("ApprovalProps", expandProcessDto.getNodeProps());
+        workflowDto.getParams().put("businessCode", workflowDto.getBusinessKey());
         JSONArray jsonArray = JSONArray.parseArray(expandProcessDto.getVariable());
 
         if (jsonArray != null && jsonArray.size() > 0) {
@@ -282,22 +279,15 @@ public class WorkflowServiceImpl extends AbstractSubject implements IWorkflowSer
         ProcessGroupProps props = jsonObject.getObject(task.getTaskDefinitionKey(), ProcessGroupProps.class);
         WorkflowInstance instance = new WorkflowInstance(dto, processEngine);
 
-        Comment comment;
-        WorkflowApprovalResultMsg msg = null;
-        //驳回
-        if (ApprovalActionEnum.REJECT.toString().equals(dto.getResult())) {
-            comment = instance.refuse(task, props);
-            msg= WorkflowApprovalResultMsg.passMsg(dto.getBusiness(),
-                    task.getCaseInstanceId());
-        } else {
-            comment = instance.pass(task, props);
-            msg = WorkflowApprovalResultMsg.rejectMsg(dto.getBusiness(),
-                    task.getCaseInstanceId());
-        }
-        notifyObserver(msg);
+        //流程审批
+        ApproveResult approveResult = instance.approve(task, props);
 
-        //更新 comment
-        actWorkflowRepository.saveApprovalResultComment(ApprovalActionEnum.REJECT.toString(), comment.getId());
+        if (approveResult.getMsg() != null) {
+            notifyObserver(approveResult.getMsg());
+        }
+
+        //保存 comment 审批结果
+        actWorkflowRepository.saveApprovalResultComment(dto.getResult(), approveResult.getComment().getId());
         return "";
     }
 

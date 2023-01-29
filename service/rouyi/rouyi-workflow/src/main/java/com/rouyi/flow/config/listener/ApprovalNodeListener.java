@@ -4,10 +4,17 @@ import com.alibaba.fastjson2.JSONObject;
 import com.rouyi.flow.config.WorkflowConstant;
 import com.rouyi.flow.domain.valobj.AssignedUser;
 import com.rouyi.flow.domain.valobj.ProcessGroupProps;
+import com.rouyi.flow.service.ApproveObserver;
+import com.rouyi.flow.service.impl.AbstractSubject;
+import com.ruoyi.common.constant.WorkflowCommonConstant;
+import com.ruoyi.common.core.domain.model.WorkflowApprovalResultMsg;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.camunda.bpm.engine.impl.persistence.entity.ExecutionEntity;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,15 +24,38 @@ import java.util.stream.Collectors;
  * @date 2022/11/9 10:39
  */
 @Slf4j
+@AllArgsConstructor
 @Service("approvalNodePreProcessListener")
-public class ApprovalNodeListener {
+public class ApprovalNodeListener extends AbstractSubject {
+
+    private ApproveObserver approveObserver;
+
+    @PostConstruct
+    public void registerObserver(){
+        add(approveObserver);
+    }
+
+
     public void preExecution(DelegateExecution execution) {
         log.error("用户节点前置执行！！！");
     }
 
     public void start(DelegateExecution execution) {
-        log.info("--->>>>" + execution.getVariable("collects"));
-        log.error("用户节点监听还是");
+        log.error("流程开始");
+
+    }
+
+    /**
+     * 流程结束
+     * @param execution
+     */
+    public void end(DelegateExecution execution) {
+        log.info("流程结束");
+
+        ExecutionEntity executionEntity = (ExecutionEntity) execution;
+        WorkflowApprovalResultMsg msg = WorkflowApprovalResultMsg.passMsg(executionEntity.getBusinessKey(), executionEntity.getCaseInstanceId());
+        msg.setApprovalResultStatus(WorkflowCommonConstant.APPROVAL_RESULT_STATUS_PASS);
+        notifyObserver(msg);
     }
 
     /**
