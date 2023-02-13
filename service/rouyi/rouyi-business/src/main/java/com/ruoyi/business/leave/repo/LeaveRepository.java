@@ -65,7 +65,7 @@ public class LeaveRepository {
             dto =   new LeaveDto();
             BeanUtils.copyBeanProp(po, dto);
             ISysCommonService bean = SpringUtils.getBean(ISysCommonService.class);
-            SysUser sysUser = bean.getUserById(dto.getUserId());
+            SysUser sysUser = bean.getUserById(String.valueOf(dto.getUserId()));
             dto.setUserName(sysUser.getUserName());
             dto.setDeptName(sysUser.getDept().getDeptName());
             redisCache.setCacheObject(CacheConstants.BUSINESS_LEAVE_DETAIL + id, dto);

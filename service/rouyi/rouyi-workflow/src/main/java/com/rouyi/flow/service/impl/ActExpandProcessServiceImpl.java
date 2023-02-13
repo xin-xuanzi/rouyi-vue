@@ -69,7 +69,7 @@ public class ActExpandProcessServiceImpl  implements IActExpandProcessService {
         BpmnModelInstance bpmnModelInstance = expandProcessParser.parse();
 
         //部署流程
-        Deployment deploy = repositoryService.createDeployment().name("")
+        Deployment deploy = repositoryService.createDeployment().name(expandProcess.getName())
                 .addModelInstance(expandProcess.getName() + ".bpmn", bpmnModelInstance)
                 .deploy();
         ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery().deploymentId(deploy.getId()).singleResult();

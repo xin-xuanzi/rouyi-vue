@@ -116,7 +116,7 @@ public class SysUserServiceImpl implements ISysUserService
      * @return 用户对象信息
      */
     @Override
-    public SysUser selectUserById(Long userId)
+    public SysUser selectUserById(String userId)
     {
         return userMapper.selectUserById(userId);
     }

@@ -16,7 +16,7 @@ public class SysCommonService implements ISysCommonService {
     @Autowired
     private ISysUserService userService;
     @Override
-    public SysUser getUserById(Long userId) {
+    public SysUser getUserById(String userId) {
         return userService.selectUserById(userId);
     }
 }

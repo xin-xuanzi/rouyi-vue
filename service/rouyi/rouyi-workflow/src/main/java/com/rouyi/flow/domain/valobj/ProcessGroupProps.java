@@ -14,6 +14,7 @@ import java.util.List;
 public class ProcessGroupProps extends ProcessNodeProps{
     private String groupsType;
     private String expression;
+    private Integer multiCompletedCount;
     private List<Groups> groups;
 
     @Data

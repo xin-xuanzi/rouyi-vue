@@ -9,6 +9,8 @@ import com.rouyi.flow.domain.dto.ProcessTodoDto;
 import com.rouyi.flow.service.IWorkflowService;
 import com.ruoyi.common.enums.ApprovalActionEnum;
 import lombok.extern.slf4j.Slf4j;
+import org.camunda.bpm.engine.ProcessEngine;
+import org.camunda.bpm.engine.runtime.Execution;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -25,8 +27,23 @@ public class WorkflowTest extends BaseJunit{
     @Autowired
     private IWorkflowService workflowService;
 
-    private String PROCESS_INSTANCE_ID = "e1de986e-948b-11ed-a535-c6bde56990c4";
 
+    @Autowired
+    private ProcessEngine processEngine;
+
+    private String PROCESS_INSTANCE_ID = "c1701dfe-a84a-11ed-96b5-c6bde56990c4";
+
+
+
+    @Test
+    public void exection(){
+
+        List<Execution> list = processEngine.getRuntimeService().createExecutionQuery().processInstanceId("496d59b3-a84b-11ed-96b5-c6bde56990c4").list();
+
+        for (Execution execution : list) {
+            System.out.println(execution);
+        }
+    }
     @Test
     public void startWorkflow() throws Exception {
         WorkflowDto workflowDto = new WorkflowDto();
@@ -92,8 +109,8 @@ public class WorkflowTest extends BaseJunit{
     public void complete() {
         WorkflowQuery query = new WorkflowQuery();
         query.setProcessInstanceId(PROCESS_INSTANCE_ID);
-        query.setBusinessKey("demo");
-        query.setUserId("A");
+        query.setBusinessKey("LEAVE4");
+        query.setUserId("100");
 
         workflowService.complete(query);
     }

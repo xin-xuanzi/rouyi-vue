@@ -3,8 +3,9 @@ package com.rouyi.flow.service;
 import com.rouyi.flow.domain.WorkflowApprovalDto;
 import com.rouyi.flow.domain.WorkflowDto;
 import com.rouyi.flow.domain.WorkflowQuery;
-import com.rouyi.flow.domain.dto.ApprovalRecordDto;
+import com.rouyi.flow.domain.dto.ApprovalRecordNodeDto;
 import com.rouyi.flow.domain.dto.ProcessTodoDto;
+import com.ruoyi.common.core.domain.entity.SysUser;
 
 import java.util.List;
 
@@ -27,13 +28,19 @@ public interface IWorkflowService {
     List<ProcessTodoDto> queryTodo(WorkflowQuery query);
 
     /**
-     * 查修你已审批
+     * 查询已审批
      * @param query
      * @return
      */
     List<ProcessTodoDto> queryApproved(WorkflowQuery query);
     ProcessTodoDto queryTodoDetail(String taskId);
-    List<ApprovalRecordDto> queryApprovalRecord(String processInstanceId);
+
+    /**
+     * 审批记录
+     * @param processInstanceId
+     * @return
+     */
+    List<ApprovalRecordNodeDto> queryApprovalRecord(String processInstanceId);
     long queryTodoCount(WorkflowQuery query);
 
     void submit(WorkflowQuery query);
@@ -46,5 +53,10 @@ public interface IWorkflowService {
      */
     String approve(WorkflowApprovalDto dto);
 
-
+    /**
+     * 查询 当前流程实例的审批人
+     * @param procIstId
+     * @return
+     */
+    List<SysUser> queryCurrentApprover(String procIstId);
 }

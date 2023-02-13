@@ -61,6 +61,12 @@ public class WorkflowInstance extends AbstractSubject {
         }
     }
 
+    /**
+     * 驳回
+     * @param currentTask
+     * @param props
+     * @return
+     */
     private ApproveResult refuse(Task currentTask, ProcessNodeProps props) {
         ActivityInstance tree = processEngine.getRuntimeService().getActivityInstance(instanceId);
 
@@ -94,7 +100,15 @@ public class WorkflowInstance extends AbstractSubject {
             //结束流程
             case ProcessCommonType.RefuseType.TO_END:
                 processInstanceModification = processInstanceModification
-                        .cancelActivityInstance(currentActivityInstance.getId());
+                        .cancelActivityInstance(currentActivityInstance.getId())
+                ;
+
+                if (ProcessCommonType.ModeType.AND.equals(props.getMode())
+                        || ProcessCommonType.ModeType.NEXT.equals(props.getMode())) {
+                    processInstanceModification = processInstanceModification
+                            .cancelActivityInstance(currentActivityInstance.getParentActivityInstanceId());
+                }
+
                 approveResult.setApprovalResultStatus(WorkflowCommonConstant.APPROVAL_RESULT_STATUS_REJECT);
                 break;
             //驳回到上一审批人

@@ -1,7 +1,8 @@
 package com.ruoyi.system.service;
 
-import java.util.List;
 import com.ruoyi.common.core.domain.entity.SysUser;
+
+import java.util.List;
 
 /**
  * 用户 业务层
@@ -48,7 +49,7 @@ public interface ISysUserService
      * @param userId 用户ID
      * @return 用户对象信息
      */
-    public SysUser selectUserById(Long userId);
+    public SysUser selectUserById(String userId);
 
     /**
      * 根据用户ID查询用户所属角色组

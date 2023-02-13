@@ -19,9 +19,25 @@
           <div>系统角色</div>
         </div>
         <div class="org-items" :style="type === 'role' ? 'height: 350px':''">
-          <el-empty :image-size="100" description="似乎没有数据" v-show="orgs.length === 0"/>
-          <div v-for="(org, index) in orgs" :key="index" :class="orgItemClass(org)" @click="selectChange(org)">
-            <el-checkbox v-model="org.selected" :disabled="disableDept(org)"></el-checkbox>
+          <el-empty :image-size="100" description="似乎没有数据" v-show="nodes.length === 0"/>
+
+          <div class="org_item" v-for="(org, index) in nodes"  :key="index">
+            <el-checkbox v-model="org.selected" @change="() => selectChange(org)">
+              <div :class="orgItemClass(org)" >
+                <div v-if="type == 'variable'" style="display: flex; align-items: center">
+                  <span class="name">{{ org.title }} - {{org.code ||'' }}</span>
+                </div>
+                <div v-else style="display: flex; align-items: center">
+                  <span class="name">{{ org.nickName }} {{org.code ||'' }}</span>
+                </div>
+                <!--            <div style="display: inline-block" v-else>-->
+                <!--              <i class="iconfont icon-bumen"></i>-->
+                <!--              <span class="name">{{ org.name }}</span>-->
+                <!--            </div>-->
+              </div>
+            </el-checkbox>
+          </div>
+
 <!--            <div v-if="org.type === 'dept'">-->
 <!--              <i class="el-icon-folder-opened"></i>-->
 <!--              <span class="name">{{ org.name }}</span>-->
@@ -29,17 +45,7 @@
 <!--                <i class="iconfont icon-map-site"></i>下级-->
 <!--              </span>-->
 <!--            </div>-->
-            <div v-if="type == 'variable'" style="display: flex; align-items: center">
-              <span class="name">{{ org.title }} - {{org.code ||'' }}</span>
-            </div>
-            <div v-else style="display: flex; align-items: center">
-              <span class="name">{{ org.nickName }} {{org.code ||'' }}</span>
-            </div>
-<!--            <div style="display: inline-block" v-else>-->
-<!--              <i class="iconfont icon-bumen"></i>-->
-<!--              <span class="name">{{ org.name }}</span>-->
-<!--            </div>-->
-          </div>
+
         </div>
 
         <el-pagination hide-on-single-page
@@ -132,9 +138,6 @@ export default {
   computed: {
     deptStackStr() {
       return String(this.deptStack.map(v => v.name)).replaceAll(',', ' > ')
-    },
-    orgs() {
-      return this.nodes
     },
     showUsers(){
       return this.search || this.search.trim() !== ''
@@ -235,16 +238,6 @@ export default {
     },
     selectChange(node) {
       if (node.selected) {
-        this.checkAll = false;
-        for (let i = 0; i < this.select.length; i++) {
-          if (this.select[i].id === node.id) {
-            this.select.splice(i, 1);
-            break;
-          }
-        }
-        node.selected = false;
-      } else if (!this.disableDept(node)) {
-        node.selected = true
         let nodes = this.search.trim() === '' ? this.nodes : this.searchUsers;
         if (!this.multiple) {
           nodes.forEach(nd => {
@@ -266,6 +259,37 @@ export default {
             this.select.push(node);
           }
         }
+      } else {
+
+        this.checkAll = false;
+        for (let i = 0; i < this.select.length; i++) {
+          if (this.select[i].id === node.id) {
+            this.select.splice(i, 1);
+            break;
+          }
+        }
+       // node.selected = false;
+        // let nodes = this.search.trim() === '' ? this.nodes : this.searchUsers;
+        // if (!this.multiple) {
+        //   nodes.forEach(nd => {
+        //     if (node.id !== nd.id) {
+        //       nd.selected = false
+        //     }
+        //   })
+        // }
+        // if (node.type === 'dept') {
+        //   if (!this.multiple) {
+        //     this.select = [node]
+        //   } else {
+        //     this.select.unshift(node);
+        //   }
+        // } else {
+        //   if (!this.multiple) {
+        //     this.select = [node]
+        //   } else {
+        //     this.select.push(node);
+        //   }
+        // }
       }
     },
     noSelected(index) {
@@ -511,5 +535,9 @@ $containWidth: 278px;
 ::-webkit-scrollbar-thumb {
   border-radius: 16px;
   background-color: #efefef;
+}
+
+.org_item {
+  padding: 0 10px;
 }
 </style>

@@ -47,4 +47,6 @@ public class CacheConstants
 
     public static final String BUSINESS_LEAVE_DETAIL = "business:leave:";
 
+    public static final String BUSINESS = "business";
+
 }

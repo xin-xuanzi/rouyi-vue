@@ -4,12 +4,25 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.rouyi.flow.repo.dao.IActWorkflowDao">
 
-    <resultMap id="approvalRecordDto" type="com.rouyi.flow.domain.dto.ApprovalRecordDto">
+    <resultMap id="approvalRecordItemDto" type="com.rouyi.flow.domain.dto.ApprovalRecordNodeDto$ApprovalRecordItemDto">
+        <result  column="END_TIME_"   property="time"     />
          <result  column="FULL_MSG_"   property="comment"     />
-         <result  column="TIME_"   property="time"     />
          <result  column="APPROVAL_RESULT"   property="approvalResult"     />
          <result  column="user_name"   property="userName"     />
-         <result  column="NAME_"   property="taskName"     />
+         <result  column="ASSIGNEE_"   property="assignee"     />
+         <result  column="ACT_NAME_"   property="actName"     />
+    </resultMap>
+
+    <resultMap id="approvalRecordNode" type="com.rouyi.flow.domain.dto.ApprovalRecordNodeDto">
+
+         <result  column="START_TIME_"   property="time"     />
+         <result  column="ID_"   property="actHiInstId"     />
+         <result  column="ACT_ID_"   property="actId"     />
+         <result  column="TASK_ID_"   property="taskId"     />
+         <result  column="ACT_TYPE_"   property="actType"     />
+         <result  column="ACT_NAME_"   property="actName"     />
+         <result  column="ASSIGNEE_"   property="assignee"     />
+         <result  column="NAME_"   property="actName"     />
     </resultMap>
 
     <resultMap id="processApproved" type="com.rouyi.flow.domain.dto.ProcessTodoDto">
@@ -23,17 +36,27 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result  column="ID_"   property="taskId"     />
     </resultMap>
 
-    <update id="updateComment" >
-        update ACT_HI_COMMENT set APPROVAL_RESULT=#{approvalResult} where ID_=#{commentId}
+    <update id="updateApprovalResult" >
+        update ACT_HI_TASKINST set APPROVAL_RESULT=#{approvalResult} where ID_=#{taskId}
     </update>
     
-    <select id="queryApprovalTodo" resultMap="approvalRecordDto">
-
-        select A.ID_, A.FULL_MSG_, A.TIME_, A.REMOVAL_TIME_, ssu.user_name,  A.APPROVAL_RESULT, AHT.NAME_, ASSIGNEE_, DELETE_REASON_, DURATION_
-        from ACT_HI_COMMENT A
-        left join     ACT_HI_TASKINST AHT on A.TASK_ID_ = AHT.ID_
-        left join     sys_user ssu on AHT.ASSIGNEE_ = ssu.user_id
-        where A.PROC_INST_ID_=#{processInstanceId}
+    <select id="queryApprovalNodeItem" resultMap="approvalRecordItemDto">
+        select A.ID_, ACT_ID_, A.TASK_ID_, ACT_TYPE_, ACT_NAME_, A.ASSIGNEE_,A.END_TIME_ , B.APPROVAL_RESULT, C.FULL_MSG_
+        from ACT_HI_ACTINST A
+        left join ACT_HI_TASKINST B on A.TASK_ID_=B.ID_
+        left join ACT_HI_COMMENT C on A.TASK_ID_=C.TASK_ID_
+        where
+            A.PROC_INST_ID_=#{processInstanceId}
+          and A.PARENT_ACT_INST_ID_=#{actHiInstId}
+          and A.ACT_TYPE_  in ('multiInstanceBody', 'userTask')
+          and (
+                (B.DELETE_REASON_ = 'deleted' and  B.APPROVAL_RESULT is not null)
+                OR
+                (B.DELETE_REASON_ = 'completed' and  B.APPROVAL_RESULT is not null)
+                OR
+                (B.DELETE_REASON_ is null and  B.APPROVAL_RESULT is null)
+            )
+        order by A.START_TIME_ desc
     </select>
 
     <select id="queryApproved" resultMap="processApproved">
@@ -50,5 +73,20 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             and A.END_TIME_ between #{beginDate} and #{endDate}
         </if>
         order by  A.END_TIME_ desc
+    </select>
+
+    <select id="queryCurrentApprover" resultType="java.lang.String">
+        select ASSIGNEE_ from ACT_RU_TASK where EXECUTION_ID_ in (
+            select id_ from ACT_RU_EXECUTION where PROC_INST_ID_=#{procInstId}
+                                               and IS_ACTIVE_=1
+        )
+    </select>
+
+    <select id="queryActNodeByProcInsId" resultMap="approvalRecordNode">
+        select ID_, ACT_ID_, TASK_ID_, ACT_TYPE_, ACT_NAME_, ASSIGNEE_, START_TIME_ from ACT_HI_ACTINST
+        where PARENT_ACT_INST_ID_=#{processInstanceId}
+        and ACT_TYPE_  in ('multiInstanceBody', 'userTask')
+        order by START_TIME_ desc
+
     </select>
 </mapper> 

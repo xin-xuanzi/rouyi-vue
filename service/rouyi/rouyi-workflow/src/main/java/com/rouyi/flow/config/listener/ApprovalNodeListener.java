@@ -75,7 +75,8 @@ public class ApprovalNodeListener extends AbstractSubject {
 
             List<AssignedUser> assignedUser = props.getAssignedUser();
             List<String> collect = assignedUser.stream().map(AssignedUser::getUserId).collect(Collectors.toList());
-            execution.setVariable("countersignUsers", collect);
+            execution.setVariable(WorkflowConstant.MULTI_APPROVER_INSTANCE, collect);
+            execution.setVariable(WorkflowConstant.MULTI_COMPLETED_COUNT, props.getMultiCompletedCount());
         }
 
         log.error("用户节点 preProcessEndListener 监听");

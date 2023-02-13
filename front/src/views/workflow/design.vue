@@ -64,6 +64,9 @@ export default {
     },
     actExpandProcessId:{
       type:String
+    },
+    selectedBusinessCode:{
+      type:String
     }
   },
   data() {
@@ -145,7 +148,7 @@ export default {
     loadInitFrom() {
       let baseInfo = {
         expandProcessId: null,
-        businessCode: "",
+        businessCode: this.selectedBusinessCode,
         name: "未命名流程",
         settings: {
           notify: {

@@ -1,9 +1,7 @@
 package com.rouyi.flow;
 
-import com.rouyi.flow.config.WorkflowConstant;
 import com.rouyi.flow.config.parser.ExpandProcessParser;
 import com.rouyi.flow.domain.ExpandProcess;
-import com.ruoyi.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
@@ -18,10 +16,10 @@ import java.io.*;
 public class WorkflowTest {
 
     public static void main(String[] args)throws Exception {
-        String split = StringUtils.substring("Approval-pre-process_node_12312", WorkflowConstant.APPROVAL_PRE_INTERMEDIATE_THROW_EVENT.length());
-        System.out.println(" ===>>>"+split);
+//        String split = StringUtils.substring("Approval-pre-process_node_12312", WorkflowConstant.APPROVAL_PRE_INTERMEDIATE_THROW_EVENT.length());
+//        System.out.println(" ===>>>"+split);
 
-        //test001();
+        test001();
 //        Class<?> aClass = Class.forName("com.rouyi.flow.service.IWorkflowVariableInvokeService");
 //        Method[] classMethods = aClass.getMethods();
 //        for (Method classMethod : classMethods) {
@@ -34,8 +32,8 @@ public class WorkflowTest {
 
 
         ExpandProcess expandProcess = new ExpandProcess();
-        expandProcess.setName("请假");
-        expandProcess.setBusinessCode("LEAVE");
+        expandProcess.setName("测试-延时审批");
+        expandProcess.setBusinessCode("delay_complete");
         expandProcess.setSource(source);
         ExpandProcessParser expandProcessParser = new ExpandProcessParser(expandProcess);
 
@@ -43,7 +41,7 @@ public class WorkflowTest {
 
         File file = null;
         try {
-            file = new File("E:\\Projects\\my-project\\process\\AAAAAAAAAAAAA.bpmn");
+            file = new File("E:\\Projects\\my-project\\process\\delay_complete.bpmn");
             Bpmn.writeModelToFile(file, parse);
         } catch (Exception e) {
             // TODO Auto-generated catch block

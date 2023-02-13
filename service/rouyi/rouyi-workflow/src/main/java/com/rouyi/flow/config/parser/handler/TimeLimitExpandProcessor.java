@@ -62,11 +62,20 @@ public class TimeLimitExpandProcessor implements IExpandHandler{
 
             case "NOTIFY":
                 // 消息提醒, 并创建 service task
-                TimeCycle timeCycle = done.newInstance(TimeCycle.class);
-                timeCycle.setTextContent("R/PT10S");
-                timerEventDefinition.setTimeCycle(timeCycle);
+                boundaryEvent.setCancelActivity(false);
+                if (handler.getNotify().isOnce()) {
+                    TimeDuration td2 = done.newInstance(TimeDuration.class);
+                    td2.setTextContent("PT" + handler.getNotify().getHour() + "H");
+                    timerEventDefinition.setTimeDuration(td2);
+                } else {
+                    TimeCycle timeCycle = done.newInstance(TimeCycle.class);
+                    timeCycle.setTextContent("R/PT"  + handler.getNotify().getHour() + "H");
+                    timerEventDefinition.setTimeCycle(timeCycle);
+                }
+
                 handler.setBoundaryEvent(boundaryEvent);
                 handler.handle(nodeBuilder);
+            default:
         }
 
 

@@ -7,10 +7,7 @@ import com.rouyi.flow.config.WorkflowConstant;
 import com.rouyi.flow.domain.WorkflowApprovalDto;
 import com.rouyi.flow.domain.WorkflowDto;
 import com.rouyi.flow.domain.WorkflowQuery;
-import com.rouyi.flow.domain.dto.ApprovalRecordDto;
-import com.rouyi.flow.domain.dto.ExpandProcessDto;
-import com.rouyi.flow.domain.dto.ProcessTodoDto;
-import com.rouyi.flow.domain.dto.ProcessVariableDto;
+import com.rouyi.flow.domain.dto.*;
 import com.rouyi.flow.domain.entity.WorkflowInstance;
 import com.rouyi.flow.domain.valobj.ApproveResult;
 import com.rouyi.flow.domain.valobj.ProcessGroupProps;
@@ -78,6 +75,7 @@ public class WorkflowServiceImpl extends AbstractSubject implements IWorkflowSer
 
     @Override
     public String startWorkflow(WorkflowDto workflowDto) throws Exception {
+
         ExpandProcessDto expandProcessDto = actExpandProcessService.detailByProcessDefinition(workflowDto.getProcessDefinitionId());
         //保存流程变量 nodeProps
         workflowDto.setBusinessKey(expandProcessDto.getBusinessCode());
@@ -176,10 +174,18 @@ public class WorkflowServiceImpl extends AbstractSubject implements IWorkflowSer
             dto.setDeptName(userInfo.getDept().getDeptName());
         }
 
+
+
         ProcessDefinition procDef = getProcDef(processDefinitionId);
         if (procDef != null) {
             dto.setBusinessCode(procDef.getKey());
             dto.setProcessName(procDef.getName());
+        }
+
+        ActProcessBusinessDto actProcessBusinessDto = actExpandBusinessService.queryBusinessDetail(dto.getBusinessCode());
+        if (actProcessBusinessDto != null) {
+
+            dto.setBusinessName(actProcessBusinessDto.getBusinessName());
         }
     }
 
@@ -232,7 +238,7 @@ public class WorkflowServiceImpl extends AbstractSubject implements IWorkflowSer
     }
 
     @Override
-    public List<ApprovalRecordDto> queryApprovalRecord(String processInstanceId) {
+    public List<ApprovalRecordNodeDto> queryApprovalRecord(String processInstanceId) {
         return actWorkflowRepository.queryApprovalTodo(processInstanceId);
     }
 
@@ -287,8 +293,19 @@ public class WorkflowServiceImpl extends AbstractSubject implements IWorkflowSer
         }
 
         //保存 comment 审批结果
-        actWorkflowRepository.saveApprovalResultComment(dto.getResult(), approveResult.getComment().getId());
+        actWorkflowRepository.saveApprovalResult(dto.getResult(), task.getId());
         return "";
+    }
+
+    @Override
+    public List<SysUser> queryCurrentApprover(String procIstId) {
+        List<String> strings = actWorkflowRepository.queryCurrentApprover(procIstId);
+        List<SysUser> userList = Lists.newArrayListWithCapacity(strings.size());
+        for (String userId : strings) {
+            userList.add(sysCommonService.getUserById(userId));
+        }
+
+        return userList;
     }
 
     /**
@@ -329,7 +346,7 @@ public class WorkflowServiceImpl extends AbstractSubject implements IWorkflowSer
         }
 
         if (submitter != null) {
-            return sysCommonService.getUserById(Long.parseLong(submitter.toString()));
+            return sysCommonService.getUserById(submitter.toString());
         }
 
         return null;

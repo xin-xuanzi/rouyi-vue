@@ -29,4 +29,19 @@ public class WorkflowConstant {
      * 提交人
      */
     public static final String SUBMITTER = "Submitter_12312";
+
+
+
+    /**
+     * 多人审批或签，审批个数
+     */
+    public static final String MULTI_COMPLETED_COUNT = "multiCompletedCount";
+
+
+    /**
+     * 都审批人实例， 变量参数
+     */
+    public static final String MULTI_APPROVER_INSTANCE = "multiApproverInstance";
+
+    public static final String APPROVER = "approver";
 }

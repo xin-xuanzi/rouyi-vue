@@ -79,7 +79,17 @@
           <el-radio-group v-model="nodeProps.mode">
             <el-radio label="NEXT">会签 （按选择顺序审批，每个人必须同意）</el-radio>
             <el-radio label="AND">会签（可同时审批，每个人必须同意）</el-radio>
-            <el-radio label="OR">或签（有一人同意即可）</el-radio>
+            <el-radio label="OR">或签 审批人数 >
+                <el-select style="width: 60px" v-model="nodeProps.multiCompletedCount"  placeholder="Select" size="small">
+                  <el-option
+                      v-for="item in selectAssignedNumOptions"
+                      :key="item"
+                      :label="item"
+                      :value="item"
+                  />
+                </el-select>
+              时通过
+            </el-radio>
           </el-radio-group>
         </el-form-item>
       </div>
@@ -178,6 +188,14 @@ export default {
     },
     select() {
       return this.config.assignedUser || []
+    },
+    selectAssignedNumOptions(){
+      let array = [];
+      for (let i = 1; i <= this.nodeProps.assignedUser.length; i++) {
+        array.push(i);
+      }
+      console.log(this.nodeProps.assignedUser.length)
+      return array;
     },
     forms() {
       return flowProcess().design.formItems.filter(f => {

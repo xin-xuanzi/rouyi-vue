@@ -4,7 +4,7 @@
       <template #header>
         <div class="card-header">
           <h3>{{ item.businessName }}</h3>
-          <el-button class="button" icon="Plus" @click="handleAdd">新增流程</el-button>
+          <el-button class="button" icon="Plus" @click="handleAdd(item.businessCode)">新增流程</el-button>
         </div>
       </template>
 
@@ -70,7 +70,7 @@
         </div>
       </template>
       <design :fullscreen="fullscreen" @deploySuccess="deploySuccess"
-              :act-expand-process-id="actExpandProcessId"/>
+              :act-expand-process-id="actExpandProcessId" :selected-business-code="selectedBusinessCode"/>
     </el-dialog>
 
     <el-dialog v-model="dialogShowHistory" title="历史版本">
@@ -99,6 +99,7 @@ const dialogTableVisible = ref(false)
 const dialogShowHistory = ref(false)
 const fullscreen = ref(false)
 const actExpandProcessId = ref(null)
+const selectedBusinessCode = ref(null)
 
 /** 查询部门列表 */
 function getList() {
@@ -111,9 +112,10 @@ function getList() {
   });
 }
 
-function handleAdd() {
+function handleAdd(businessCode) {
   actExpandProcessId.value = null
   dialogTableVisible.value = true;
+  selectedBusinessCode.value = businessCode
 }
 function handleStatusChange(row) {
   let text = row.status === "1" ? "启用" : "停用";

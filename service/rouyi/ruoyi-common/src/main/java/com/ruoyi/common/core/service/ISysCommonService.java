@@ -11,5 +11,5 @@ public interface ISysCommonService {
      * 根据ID获取用户信息
      * @return
      */
-    SysUser getUserById(Long userId);
+    SysUser getUserById(String userId);
 }

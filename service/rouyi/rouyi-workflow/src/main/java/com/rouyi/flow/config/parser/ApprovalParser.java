@@ -69,24 +69,26 @@ public class ApprovalParser extends AbstractNodeParser {
 
         // 指定人员
         if (ProcessCommonType.AssignedType.ASSIGN_USER.equals(props.getAssignedType())) {
-            MultiInstanceLoopCharacteristicsBuilder countersignUsers = userTaskBuilder.multiInstance().sequential()
-                    .camundaCollection("countersignUsers")
-                    .camundaElementVariable("approver")
+            MultiInstanceLoopCharacteristicsBuilder countersignUsers = userTaskBuilder.multiInstance()
+                    .camundaCollection(WorkflowConstant.MULTI_APPROVER_INSTANCE)
+                    .camundaElementVariable(WorkflowConstant.APPROVER)
                     ;
             //会签 或签判断
             switch (props.getMode()) {
                 case ProcessCommonType.ModeType.AND:
-
-                    break;
-                case ProcessCommonType.ModeType.NEXT:
                     countersignUsers.parallel();
                     break;
+                case ProcessCommonType.ModeType.NEXT:
+                    countersignUsers.sequential();
+                    break;
                 case ProcessCommonType.ModeType.OR:
-                    countersignUsers.completionCondition("${nrOfCompletedInstances == 1}");
 
+                    countersignUsers.completionCondition("${nrOfCompletedInstances == "+WorkflowConstant.MULTI_COMPLETED_COUNT+"}");
+                default:
+                    break;
             }
 
-            userTaskBuilder.camundaAssignee("${approver}");
+            userTaskBuilder.camundaAssignee("${"+WorkflowConstant.APPROVER+"}");
         }
 
         // 审批人为空时

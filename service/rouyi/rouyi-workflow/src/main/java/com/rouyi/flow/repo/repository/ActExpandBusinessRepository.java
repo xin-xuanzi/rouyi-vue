@@ -73,6 +73,10 @@ public class ActExpandBusinessRepository {
     public ActProcessBusinessDto queryDetailInfoByCode(String businessCode) {
         ActExpandBusinessPo expandBusinessPo = actExpandBusinessDao.selectOne(new LambdaQueryWrapper<ActExpandBusinessPo>()
                 .eq(ActExpandBusinessPo::getBusinessCode, businessCode));
+        if (expandBusinessPo == null) {
+            return null;
+        }
+
         ActProcessBusinessDto dto = new ActProcessBusinessDto();
         BeanUtils.copyProperties(expandBusinessPo, dto);
         return dto;

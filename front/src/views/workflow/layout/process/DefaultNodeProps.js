@@ -3,6 +3,7 @@ export const APPROVAL_PROPS = {
   assignedType: "ASSIGN_USER",
   mode: "AND",
   sign: false,
+  multiCompletedCount: 1,
   nobody: {
     type: "TO_PASS",
     assignedUser:[]

@@ -1,8 +1,9 @@
 package com.ruoyi.system.mapper;
 
-import java.util.List;
-import org.apache.ibatis.annotations.Param;
 import com.ruoyi.common.core.domain.entity.SysUser;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * 用户表 数据层
@@ -49,7 +50,7 @@ public interface SysUserMapper
      * @param userId 用户ID
      * @return 用户对象信息
      */
-    public SysUser selectUserById(Long userId);
+    public SysUser selectUserById(String userId);
 
     /**
      * 新增用户信息

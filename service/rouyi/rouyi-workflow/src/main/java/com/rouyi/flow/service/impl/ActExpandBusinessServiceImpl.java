@@ -8,6 +8,9 @@ import com.rouyi.flow.repo.repository.ActExpandBusinessRepository;
 import com.rouyi.flow.repo.repository.ActExpandProcessRepository;
 import com.rouyi.flow.repo.repository.ActProcessVariableRepository;
 import com.rouyi.flow.service.IActExpandBusinessService;
+import com.ruoyi.common.constant.CacheConstants;
+import com.ruoyi.common.core.redis.RedisCache;
+import com.ruoyi.common.utils.StringUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +31,8 @@ public class ActExpandBusinessServiceImpl implements IActExpandBusinessService {
     private ActExpandBusinessRepository actExpandBusinessRepository;
 
 
+    private RedisCache redisCache;
+
     @Override
     public ActProcessBusinessDto queryBusinessDetail(Long id) {
 
@@ -36,7 +41,25 @@ public class ActExpandBusinessServiceImpl implements IActExpandBusinessService {
 
     @Override
     public ActProcessBusinessDto queryBusinessDetail(String businessCode) {
-        return actExpandBusinessRepository.queryDetailInfoByCode(businessCode);
+        if (StringUtils.isEmpty(businessCode)) {
+            return null;
+        }
+
+        ActProcessBusinessDto actProcessBusinessDto = actExpandBusinessRepository.queryDetailInfoByCode(businessCode);
+
+        if (actProcessBusinessDto == null) {
+
+            List<ActProcessBusinessDto> cacheObject = redisCache.getCacheObject(CacheConstants.BUSINESS);
+            if (cacheObject == null) {
+                cacheObject = actExpandBusinessRepository.queryBusiness(null);
+
+                redisCache.setCacheObject(CacheConstants.BUSINESS, cacheObject);
+            }
+
+            actProcessBusinessDto = cacheObject.stream().filter(e -> businessCode.startsWith(e.getBusinessCode())).findAny().orElse(null);
+        }
+
+        return actProcessBusinessDto;
     }
 
     @Override

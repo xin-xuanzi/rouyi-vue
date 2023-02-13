@@ -4,6 +4,9 @@ import com.alibaba.fastjson2.JSONObject;
 import com.rouyi.flow.config.WorkflowConstant;
 import com.rouyi.flow.domain.valobj.AssignedUser;
 import com.rouyi.flow.domain.valobj.ProcessGroupProps;
+import com.rouyi.flow.service.IWorkflowService;
+import com.ruoyi.common.core.domain.entity.SysUser;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.impl.history.event.HistoricTaskInstanceEventEntity;
@@ -23,7 +26,10 @@ import java.util.List;
  */
 @Slf4j
 @Service("serviceTaskExpression")
+@AllArgsConstructor
 public class ServiceTaskExpression {
+
+    private final IWorkflowService workflowService;
 
     /**
      * 发送审批通知
@@ -31,8 +37,11 @@ public class ServiceTaskExpression {
      * @param execution
      */
     public void sendMessage(DelegateExecution execution) {
-        log.info("--->>>>" + execution.getVariable("collects"));
-        log.error("发送消息提醒");
+        List<SysUser> userList = workflowService.queryCurrentApprover(execution.getProcessInstanceId());
+
+        for (SysUser sysUser : userList) {
+            log.info("向{}发送审批消息提醒", sysUser.getUserName());
+        }
     }
 
     /**
